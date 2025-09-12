@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 class Global{
 
   static Color bg = Colors.black;
+  static Color grey = Color(0xffF3F4F6);
+
+
 }
 
 

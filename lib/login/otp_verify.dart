@@ -171,7 +171,30 @@ class _OTP_VerifyState extends State<OTP_Verify> {
               padding: const EdgeInsets.symmetric(horizontal: 23.0,vertical: 10),
               child: Text("GET A NEW OTP IN : ${_start}",style: TextStyle(fontSize:17,color: Colors.white,fontWeight: FontWeight.w700),),
             ),
-          )
+          ),
+          Spacer(),
+          InkWell(
+            onTap: (){
+              if(pinController.text=="222222"){
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
+              }else{
+                Send.message(context, "Wrong Pin", false);
+              }
+            },
+            child: Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width-60,
+                height: 55,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5)
+                ),
+                child: Center(child: Text("Next",
+                  style: TextStyle(color: Colors.black,fontWeight: FontWeight.w700),)),
+              ),
+            ),
+          ),
+          SizedBox(height: 35,)
         ],
       ),
     );
