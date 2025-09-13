@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:dod/global.dart';
 import 'package:dod/main.dart';
 import 'package:dod/main/navigation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +12,8 @@ import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart' show SmartAuth;
 
 class OTP_Verify extends StatefulWidget {
-  final String phone;
-   OTP_Verify({super.key,required this.phone});
+  final String phone;String verificationid;
+   OTP_Verify({super.key,required this.phone,required this.verificationid});
 
   @override
   State<OTP_Verify> createState() => _OTP_VerifyState();
@@ -68,6 +70,31 @@ class _OTP_VerifyState extends State<OTP_Verify> {
   late final FocusNode focusNode;
   late final GlobalKey<FormState> formKey;
 
+  void _verifyOTP(String otp, String verificationId) async {
+    try {
+      print(otp);
+      setState(() {
+        on=true;
+      });
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: otp,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      Navigator.push(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
+      Send.message(context, "Phone number verified successfully!", true);
+      setState(() {
+        on=false;
+      });
+
+    } catch (e) {
+      setState(() {
+        on=false;
+      });
+      Send.message(context, "$e", false);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,12 +114,7 @@ class _OTP_VerifyState extends State<OTP_Verify> {
         actions: [
           InkWell(
               onTap: (){
-                print(pinController.text);
-                if(pinController.text=="222222"){
-                  Navigator.push(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
-                }else{
-                  Send.message(context, "Wrong Pin", false);
-                }
+                _verifyOTP(pinController.text, widget.verificationid);
               },
               child: Text("Next",style: TextStyle(color: Colors.grey.shade200),)),
           SizedBox(width: 10,)
@@ -120,28 +142,15 @@ class _OTP_VerifyState extends State<OTP_Verify> {
             defaultPinTheme: defaultPinTheme,
             focusedPinTheme: focusedPinTheme,
             submittedPinTheme: submittedPinTheme,
-            validator: (s) {
-              return s == '222222' ? null : 'Pin is incorrect';
-            },
             enableInteractiveSelection: true,
             controller: pinController,
             pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
             showCursor: true,length: 6,
             onChanged: (pin)=>(){
-              print(pin);
-              if(pin=="222222"){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>Navigation()));
-              }else{
-                Send.message(context, "Wrong Pin", false);
-              }
+
             },
             onCompleted: (pin) => (){
-              print(pin);
-              if(pin=="222222"){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>Navigation()));
-              }else{
-                Send.message(context, "Wrong Pin", false);
-              }
+
             },
           ),
           SizedBox(height: 30,),
@@ -158,12 +167,56 @@ class _OTP_VerifyState extends State<OTP_Verify> {
             ),
             child: _start==0?InkWell(
               onTap: (){
-                setState(() {
-                  _start = 120;
-                  startTimer();
+                setState(() async {
+
+                  try {
+                    setState(() {
+                      on=true;
+                    });
+                    final FirebaseAuth _auth = FirebaseAuth.instance;
+                    await _auth.verifyPhoneNumber(
+                      phoneNumber: "+91"+widget.phone,
+                      timeout: const Duration(seconds: 60),
+                      verificationCompleted: (PhoneAuthCredential credential) async {
+                        setState(() {
+                          on=false;
+                        });
+                        Navigator.push(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
+                        Send.message(context, "Phone number verified successfully!", true);
+                      },
+                      verificationFailed: (FirebaseAuthException e) {
+                        setState(() {
+                          on=false;
+                        });
+                        Send.message(context, "$e", false);
+                      },
+                      codeSent: (String verificationId, int? resendToken) {
+                        setState(() {
+                          on=false;
+                        });
+                        _start = 120;
+                        startTimer();
+                        widget.verificationid = verificationId;
+                        Send.message(context, "OTP Resent to your Mobile Number", true);
+                      },
+                      codeAutoRetrievalTimeout: (String verificationId) {
+                        setState(() {
+                          on=false;
+                        });
+                        widget.verificationid = verificationId;
+                        Send.message(context, "Time Out", false);
+                      },
+                    );
+                  }catch(e){
+                    setState(() {
+                      on=false;
+                    });
+                    Send.message(context, "$e", false);
+                  }
+
                 });
               },
-              child: Padding(
+              child: on?SizedBox():Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 23.0,vertical: 10),
                 child: Text("RESEND A NEW OTP",style: TextStyle(fontSize:17,color: Colors.white,fontWeight: FontWeight.w700),),
               ),
@@ -173,13 +226,9 @@ class _OTP_VerifyState extends State<OTP_Verify> {
             ),
           ),
           Spacer(),
-          InkWell(
+          on?CircularProgressIndicator():InkWell(
             onTap: (){
-              if(pinController.text=="222222"){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
-              }else{
-                Send.message(context, "Wrong Pin", false);
-              }
+              _verifyOTP(pinController.text, widget.verificationid);
             },
             child: Center(
               child: Container(
@@ -199,6 +248,7 @@ class _OTP_VerifyState extends State<OTP_Verify> {
       ),
     );
   }
+  bool on = false;
 
   final defaultPinTheme = PinTheme(
     width: 49,

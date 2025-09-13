@@ -1,5 +1,6 @@
 import 'package:dod/global.dart';
 import 'package:dod/login/otp_verify.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -106,7 +107,7 @@ class _LoginState extends State<Login> {
           ),
           Text("Privacy Policy",style: TextStyle(color: Colors.blue,fontWeight: FontWeight.w500),),
           SizedBox(height: 35),
-          InkWell(
+          on?CircularProgressIndicator(backgroundColor: Colors.white,):InkWell(
             onTap: (){
               go(context);
             },
@@ -129,13 +130,58 @@ class _LoginState extends State<Login> {
     );
   }
 
-  void go(BuildContext context){
+  Future<void> go(BuildContext context) async {
     if(_controller.text.length==10){
-      Navigator.push(context, MaterialPageRoute(builder: (_)=>OTP_Verify(phone: _controller.text,)));
-      Send.message(context, "OTP Sent to your Mobile Number", true);
+      try {
+        final FirebaseAuth _auth = FirebaseAuth.instance;
+        String _verificationId = '';
+        setState(() {
+          on=true;
+        });
+        await _auth.verifyPhoneNumber(
+          phoneNumber: "+91"+_controller.text,
+          timeout: const Duration(seconds: 60),
+          verificationCompleted: (PhoneAuthCredential credential) async {
+            setState(() {
+              on=false;
+            });
+          },
+          verificationFailed: (FirebaseAuthException e) {
+            Send.message(context, "$e", false);
+            setState(() {
+              on=false;
+            });
+          },
+          codeSent: (String verificationId, int? resendToken) {
+            _verificationId = verificationId;
+            setState(() {
+              on=false;
+            });
+            Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                OTP_Verify(
+                  phone: _controller.text, verificationid: verificationId,)));
+            Send.message(context, "OTP Sent to your Mobile Number", true);
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {
+            setState(() {
+              on=false;
+            });
+            _verificationId = verificationId;
+            Send.message(context, "Time Out", false);
+          },
+        );
+
+      }catch(e){
+        setState(() {
+          on=false;
+        });
+        Send.message(context, "$e", false);
+      }
     }else{
       Send.message(context, "Please put your 10 Digit Mobile Number", false);
     }
+
   }
+  bool on=false;
   TextEditingController _controller=TextEditingController();
 }

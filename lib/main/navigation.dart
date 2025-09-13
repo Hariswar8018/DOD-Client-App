@@ -1,10 +1,12 @@
 import 'package:dod/api.dart';
 import 'package:dod/global.dart';
 import 'package:dod/return_functions/location.dart';
+import 'package:dod/second/one_way.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
-
+import 'package:my_location_library21/my_location_library21.dart';
+import 'package:location/location.dart' as lk;
 
 class Navigation extends StatefulWidget {
    Navigation({super.key});
@@ -17,11 +19,32 @@ class _NavigationState extends State<Navigation> {
   final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
 
-  void initState(){
+  //call function
+  Future<void> _getCurrentLocation() async {
+    print("Find");
+    lk.LocationData? locationData = await LocationService.getCurrentLocation();
+
+    mylat=(await locationData!.longitude)!;
+    mylong=(await locationData!.longitude)!;
+    setState(() {
+
+    });
+
+    print('Current Location Latitude: ${locationData?.latitude}');
+    print('Current Location  Longitude: ${locationData?.longitude}');
+
 
   }
 
-  late double mylat=40.484000837597925,mylong=-3.369978368282318;
+
+  // initialized the function
+
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  double mylat=23.0225,mylong=72.5714;
 
 
   @override
@@ -48,7 +71,7 @@ class _NavigationState extends State<Navigation> {
                       children: [
                         InkWell(
                             onTap: (){
-
+                              _getCurrentLocation();
                             },
                             child: Text("Hire Drivers",style: TextStyle(fontSize: 19,fontWeight: FontWeight.w800,color: Colors.white),)),
                         Spacer(),
@@ -70,12 +93,12 @@ class _NavigationState extends State<Navigation> {
                             apiKey: Api.googlemap,
                             key: mapsWidgetController,
                             sourceLatLng: LatLng(
-                              40.484000837597925,
-                              -3.369978368282318,
+                              mylat,
+                              mylong,
                             ),
                             destinationLatLng: LatLng(
-                              40.48017307700204,
-                              -1.3618026599287987,
+                              mylat,
+                              mylong,
                             ),
                             updatePolylinesOnDriverLocUpdate: true,
                             onPolylineUpdate: (_) {
@@ -115,69 +138,71 @@ class _NavigationState extends State<Navigation> {
                             ),
                             SizedBox(height: 10,),
                             Center(
-                              child: Container(
-                                width: w - 20,
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(height: 7),
-                                    Container(
-                                      width: w - 40,
-                                      height: 45,
-                                      decoration: BoxDecoration(
-                                        color: Global.grey,
-                                        borderRadius: BorderRadius.circular(3),
+                              child: InkWell(
+                                onTap: (){
+                                  Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way()));
+                                },
+                                child: Container(
+                                  width: w - 20,
+                                  height: 140,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SizedBox(height: 7),
+                                      InkWell(
+                                        onTap: (){
+                                          Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way()));
+                                        },
+                                        child: Container(
+                                          width: w - 40,
+                                          height: 45,
+                                          decoration: BoxDecoration(
+                                            color: Global.grey,
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(width: 15),
+                                              Icon(Icons.search),
+                                              SizedBox(width: 15),
+                                              Text(i==1?"Where from ?":"Where to ?",
+                                                style: TextStyle(fontWeight: FontWeight.w700,color: Colors.grey,fontSize: 17),),
+                                              Spacer(),
+                                              SizedBox(width: 15),
+                                            ],
+                                          ),
+                                        ),
                                       ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                      SizedBox(height: 3),
+                                      Row(
                                         children: [
                                           SizedBox(width: 15),
-                                          Icon(Icons.search),
-                                          SizedBox(width: 15),
-                                          Expanded(
-                                            child: TextFormField(
-                                              controller: controller,
-                                              decoration: InputDecoration(
-                                                hintText: i==1?"Where from ?":"Where to ?",
-                                                hintStyle: TextStyle(fontWeight: FontWeight.w700,color: Colors.grey),
-                                                border: InputBorder.none, // removes underline
-                                                contentPadding: EdgeInsets.symmetric(vertical: 10),
-                                              ),
-                                            ),
+                                          Icon(Icons.location_searching_sharp, color: Colors.green),
+                                          SizedBox(width: 10),
+                                          Text("My Location : ", style: TextStyle(color: Colors.green)),
+                                          Text(
+                                            mylocation.length > 27 ? mylocation.substring(0, 27) + '...' : mylocation,
+                                            style: TextStyle(color: Colors.black),
                                           ),
-                                          SizedBox(width: 15),
                                         ],
                                       ),
-                                    ),
-                                    SizedBox(height: 3),
-                                    Row(
-                                      children: [
-                                        SizedBox(width: 15),
-                                        Icon(Icons.location_searching_sharp, color: Colors.green),
-                                        SizedBox(width: 10),
-                                        Text("My Location : ", style: TextStyle(color: Colors.green)),
-                                        Text(
-                                          mylocation.length > 27 ? mylocation.substring(0, 27) + '...' : mylocation,
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 3),
-                                    Row(
-                                      children: [
-                                        SizedBox(width: 15),
-                                        Icon(Icons.history, color: Colors.grey),
-                                        SizedBox(width: 10),
-                                        Text("Chennai, India", style: TextStyle(color: Colors.grey)),
-                                      ],
-                                    ),
-                                    SizedBox(height: 3),
-                                  ],
+                                      SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          SizedBox(width: 15),
+                                          Icon(Icons.history, color: Colors.grey),
+                                          SizedBox(width: 10),
+                                          Text("Chennai, India", style: TextStyle(color: Colors.grey)),
+                                        ],
+                                      ),
+                                      SizedBox(height: 3),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -187,7 +212,6 @@ class _NavigationState extends State<Navigation> {
                     ],
                   ),
                 ),
-
               ],
             ),
           ),
@@ -228,14 +252,9 @@ class _NavigationState extends State<Navigation> {
                                 });
                               }
                             },
-                            child: TextFormField(
-                              controller: controller,
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                hintText: mylocation,
-                                border: InputBorder.none, // removes underline
-                                contentPadding: EdgeInsets.symmetric(vertical: 10),
-                              ),
+                            child: Text(
+                              mylocation.length > 34 ? mylocation.substring(0, 34) + '...' : mylocation,
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                         ),
@@ -252,7 +271,7 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-  String mylocation="";
+  String mylocation="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
 
   TextEditingController controller=TextEditingController();
 
