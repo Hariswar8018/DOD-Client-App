@@ -11,6 +11,9 @@ import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smart_auth/smart_auth.dart' show SmartAuth;
 
+import 'locationpermission.dart';
+import 'onboarding.dart';
+
 class OTP_Verify extends StatefulWidget {
   final String phone;String verificationid;
    OTP_Verify({super.key,required this.phone,required this.verificationid});
@@ -23,9 +26,24 @@ class _OTP_VerifyState extends State<OTP_Verify> {
   late Timer _timer;
   int _start = 60;
 
+
+  void listenToLogin() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        print("User logged in: ${user.uid}");
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>LocationPermission()));
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>Onboarding()));
+        print("User logged out");
+      }
+    });
+  }
+
+
   void initState(){
     startTimer();
     super.initState();
+    listenToLogin();
     // On web, disable the browser's context menu since this example uses a custom
     // Flutter-rendered context menu.
     if (kIsWeb) {
@@ -168,7 +186,6 @@ class _OTP_VerifyState extends State<OTP_Verify> {
             child: _start==0?InkWell(
               onTap: (){
                 setState(() async {
-
                   try {
                     setState(() {
                       on=true;

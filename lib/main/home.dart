@@ -1,0 +1,448 @@
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dod/api.dart';
+import 'package:dod/global.dart';
+import 'package:dod/return_functions/location.dart';
+import 'package:dod/second/one_way.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_widget/google_maps_widget.dart';
+import 'package:my_location_library21/my_location_library21.dart';
+import 'package:location/location.dart' as lk;
+
+
+class Home extends StatefulWidget {
+   Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
+
+
+  //call function
+  Future<void> _getCurrentLocation() async {
+    print("Find");
+    lk.LocationData? locationData = await LocationService.getCurrentLocation();
+
+    mylat=(await locationData!.longitude)!;
+    mylong=(await locationData!.longitude)!;
+    setState(() {
+
+    });
+
+    print('Current Location Latitude: ${locationData?.latitude}');
+    print('Current Location  Longitude: ${locationData?.longitude}');
+
+
+  }
+
+
+  // initialized the function
+
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  double mylat=23.0225,mylong=72.5714;
+
+
+  @override
+  Widget build(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor:Global.grey,
+      body: Stack(
+        children: [
+          Container(
+            width: w,height: h,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: w,
+                    height: 90,
+                    color: Colors.black,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          InkWell(
+                              onTap: (){
+                                _getCurrentLocation();
+                              },
+                              child: Text("Hire Drivers",style: TextStyle(fontSize: 19,fontWeight: FontWeight.w800,color: Colors.white),)),
+                          Spacer(),
+                          Text("41 MINS AWAY",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w800,color: Colors.white),)
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: w,
+                    height: 460,
+                    color: Global.grey,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: w,
+                          height: 220,
+                          child:  GoogleMapsWidget(
+                              apiKey: Api.googlemap,
+                              key: mapsWidgetController,
+                              sourceLatLng: LatLng(
+                                mylat,
+                                mylong,
+                              ),
+                              destinationLatLng: LatLng(
+                                mylat,
+                                mylong,
+                              ),
+                              updatePolylinesOnDriverLocUpdate: true,
+                              onPolylineUpdate: (_) {
+                                print("Polyline updated");
+                              },
+                              // mock stream
+                              totalTimeCallback: (time) => print(time),
+                              totalDistanceCallback: (distance) => print(distance),
+                            ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 210.0),
+                          child: Column(
+                            children: [
+                              Center(
+                                child: Container(
+                                  width: w-20,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(3)
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      a(w,Icon(Icons.arrow_right_alt,size: 30,),"One Way",0),
+                                      a(w,Icon(
+                                        CupertinoIcons.arrow_2_squarepath,size: 30,
+                                      ),"Round Trip",1),
+                                      a(w,Icon(
+                                        CupertinoIcons.bus,size: 30,
+                                      ),"Outstation",2),
+                                      a(w,Icon(Icons.calendar_month,size: 30),"Daily",3),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10,),
+                              Center(
+                                child: InkWell(
+                                  onTap: (){
+                                    Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way()));
+                                  },
+                                  child: Container(
+                                    width: w - 20,
+                                    height: 140,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(height: 7),
+                                        InkWell(
+                                          onTap: (){
+                                            Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way()));
+                                          },
+                                          child: Container(
+                                            width: w - 40,
+                                            height: 45,
+                                            decoration: BoxDecoration(
+                                              color: Global.grey,
+                                              borderRadius: BorderRadius.circular(3),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                SizedBox(width: 15),
+                                                Icon(Icons.search),
+                                                SizedBox(width: 15),
+                                                Text(i==1?"Where from ?":"Where to ?",
+                                                  style: TextStyle(fontWeight: FontWeight.w700,color: Colors.grey,fontSize: 17),),
+                                                Spacer(),
+                                                SizedBox(width: 15),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            SizedBox(width: 15),
+                                            Icon(Icons.location_searching_sharp, color: Colors.green),
+                                            SizedBox(width: 10),
+                                            Text("My Location : ", style: TextStyle(color: Colors.green)),
+                                            Text(
+                                              mylocation.length > 27 ? mylocation.substring(0, 27) + '...' : mylocation,
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            SizedBox(width: 15),
+                                            Icon(Icons.history, color: Colors.grey),
+                                            SizedBox(width: 10),
+                                            Text("Chennai, India", style: TextStyle(color: Colors.grey)),
+                                          ],
+                                        ),
+                                        SizedBox(height: 3),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: w,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Services",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 19),),
+                          SizedBox(height: 13,),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              cont(w, Colors.blue.shade50, "https://cdn-icons-png.flaticon.com/512/289/289736.png", "Service"),
+                              cont(w, Colors.greenAccent.shade100, "https://static.vecteezy.com/system/resources/thumbnails/032/161/162/small_2x/3d-gold-coin-no-background-png.png", "Coins"),
+                              cont(w, Colors.orange.shade50, "https://cdn-icons-png.flaticon.com/512/1646/1646830.png", "Refer & Earn")
+                            ],
+                          ),
+                          SizedBox(height: 9,),
+
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 25,),
+                  Container(
+                    width: w,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Special Offers",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 19),),
+                          SizedBox(height: 13,),
+                          Container(
+                            width: w,
+                            height: 140,
+                            child: CarouselSlider(
+                              options: CarouselOptions(
+                                  height: 130.0,enableInfiniteScroll: true,enlargeCenterPage: true,
+                                viewportFraction: 1.0,           // Shows only 1 image at a time
+                                autoPlay: true,                  // Optional: autoplay if you want
+                              ),
+                              items: special_offer.map((i) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.symmetric(horizontal: 1.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(5),
+                                            image: DecorationImage(image: NetworkImage(i),fit: BoxFit.cover)
+                                        ),
+                                    );
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  Container(
+                    width: w-30,
+                    color: Colors.green.shade100,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                            backgroundColor: Global.grey,
+                            child: Icon(Icons.home_work_rounded)),
+                        title: Text("Saved Address",style: TextStyle(fontWeight: FontWeight.w700),),
+                        subtitle: Text("Improved your Booking Experience",style: TextStyle(fontSize: 11),),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8,),
+                  Container(
+                    width: w-30,
+                    color: Colors.red.shade100,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                            backgroundColor: Global.grey,
+                            child: Icon(Icons.car_crash)),
+                        title: Text("Add a Car",style: TextStyle(fontWeight: FontWeight.w700),),
+                        subtitle: Text("For better Experience & Reminder",style: TextStyle(fontSize: 11),),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  Container(
+                    width: w,
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child:Image.asset("assets/home_bottom.jpg",fit: BoxFit.cover,)
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 75.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: w-40,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: Global.grey,
+                    borderRadius: BorderRadius.circular(5)
+                  ),
+                  child: InkWell(
+                    onTap: () async {
+                      String s =await Navigator.push(context, MaterialPageRoute(builder: (_)=>Location()));
+                      if(s!=null){
+                        setState(() {
+                          mylocation=s;
+                        });
+                      }
+                    },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(width: 15),
+                        Icon(Icons.location_on),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              String s =await Navigator.push(context, MaterialPageRoute(builder: (_)=>Location()));
+                              if(s!=null){
+                                setState(() {
+                                  mylocation=s;
+                                });
+                              }
+                            },
+                            child: Text(
+                              mylocation.length > 34 ? mylocation.substring(0, 34) + '...' : mylocation,
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  List<String> special_offer=[
+    "https://www.sliderrevolution.com/wp-content/uploads/2023/02/carousels.jpg",
+    "https://www.sliderrevolution.com/wp-content/uploads/2023/09/mobile-carousel.jpg",
+    "https://cdn.prod.website-files.com/6009ec8cda7f305645c9d91b/60108425d58c7fb3aac2e496_6002086f72b727411a01e2a6_sigma-template.jpeg",
+    "https://res.cloudinary.com/cloudinary-marketing/images/f_auto,q_auto/v1682458232/blog-responsive-carousel/blog-responsive-carousel.jpg?_i=AA",
+    "https://i.ytimg.com/vi/3GJach7WmFY/maxresdefault.jpg"
+  ];
+
+  Widget cont(double w,Color color,String str,String str2){
+    return Column(
+      children: [
+        Container(
+          width: w/3-38,
+          height: w/3-38,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color:color,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: Image.network(str),
+            ),
+          ),
+        ),
+        SizedBox(height: 2,),
+        Text(str2,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 12),)
+      ],
+    );
+  }
+
+  String mylocation="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
+
+  TextEditingController controller=TextEditingController();
+
+  Widget a(double w,Widget icon,String str,int u)=>InkWell(
+    onTap: (){
+      setState(() {
+        i=u;
+      });
+    },
+    child: Container(
+      width: w/4-10,
+      height: 80,
+      child: Column(
+        children: [
+          Spacer(),
+          SizedBox(height: 3,),
+          icon,
+          SizedBox(height: 3,),
+          Text(str,style: TextStyle(fontWeight: i==u?FontWeight.w400:FontWeight.w300,color:i==u?Colors.black: Colors.grey),),
+          Spacer(),
+          Container(
+            width: w/4-10,
+            height: 4,
+            decoration: BoxDecoration(
+                color: i==u?Colors.green:Colors.white,
+                borderRadius: BorderRadius.circular(10)
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+
+  int i = 0;
+}
