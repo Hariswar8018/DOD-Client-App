@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 
 import '../api.dart';
+import '../global.dart';
 
 class Book_OneWay extends StatefulWidget {
   String str,str2;
+  DateTime dateTime;
   double lat1,lat2, lon1,lon2;
-   Book_OneWay({super.key,required this.str,required this.str2,required this.lat1,required this.lat2,required this.lon1,required this.lon2});
+   Book_OneWay({super.key,
+     required this.dateTime,required this.str,required this.str2,required this.lat1,
+     required this.lat2,required this.lon1,required this.lon2});
 
   @override
   State<Book_OneWay> createState() => _Book_OneWayState();
@@ -15,6 +21,10 @@ class Book_OneWay extends StatefulWidget {
 class _Book_OneWayState extends State<Book_OneWay> {
   final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
+  bool now = false;
+  void initState(){
+    given=widget.dateTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,28 +126,33 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                 SizedBox(width: 10,),
                                 Text(widget.str2.length>27?widget.str2.substring(0,26)+"...":widget.str2,),
                                 Spacer(),
-                                Container(
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(4)
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 4),
-                                    child: Row(
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text("12 Sep",style: TextStyle(fontSize: 11),),
-                                            Text("5:00 PM",style: TextStyle(fontSize: 11),),
-                                          ],
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 7.0),
-                                          child: Icon(Icons.keyboard_arrow_down,color: Colors.black,),
-                                        )
-                                      ],
+                                InkWell(
+                                  onTap: (){
+                                    _showCustomDialog(context);
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(4)
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 4),
+                                      child: Row(
+                                        children: [
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text("${formatDate(given)}",style: TextStyle(fontSize: 11),),
+                                              Text("${formatTime(given)}",style: TextStyle(fontSize: 11),),
+                                            ],
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 7.0),
+                                            child: Icon(Icons.keyboard_arrow_down,color: Colors.black,),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -447,7 +462,291 @@ class _Book_OneWayState extends State<Book_OneWay> {
       ],
     );
   }
-  
+  void _showCustomDialog(BuildContext context) {
+
+
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Tap outside to close
+      builder: (BuildContext context) {
+        if(now){
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Container(
+              width: 350,
+              height: 310,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: const Text(
+                      "When do you need Driver ?",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Divider(),
+                  ),
+                  const SizedBox(height: 9),
+                  InkWell(
+                    onTap: (){
+                      setState(() {
+                        now=!now;
+                      });
+                      Navigator.pop(context);
+                      _showCustomDialog(context);
+                    },
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color:Global.grey,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                              child: Center(child: Text("Later",style: TextStyle(fontWeight: FontWeight.w400),)),
+                            ),),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color:Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                              child: Center(child: Text("Now",style: TextStyle(fontWeight: FontWeight.w800),)),
+                            ),),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Image.asset("assets/car2.gif",width: 100,),
+                  SizedBox(height: 5,),
+                  Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Text("Pickup Time : 18 mins from Now",style: TextStyle(fontWeight: FontWeight.w800,color: Colors.grey),),
+                  ),
+                  Spacer(),
+                  InkWell(
+                    onTap: () async {
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Color(0xff009D60),
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Center(child: Text("Set Pickup Time to Now",style: TextStyle(color: Colors.white),)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15,),
+                ],
+              ),
+            ),
+          );
+        }else{
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Container(
+              width: 350,
+              height: 310,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: const Text(
+                      "When do you need Driver ?",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Divider(),
+                  ),
+                  const SizedBox(height: 3),
+                  InkWell(
+                    onTap: (){
+                      setState(() {
+                        now=!now;
+                      });
+                      Navigator.pop(context);
+                      _showCustomDialog(context);
+                    },
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                              child: Center(child: Text("Later",style: TextStyle(fontWeight: FontWeight.w800),)),
+                            ),),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color:Global.grey,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                              child: Center(child: Text("Now",style: TextStyle(fontWeight: FontWeight.w400),)),
+                            ),),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 9,),
+                  Text("Pickup Time : "+formatDateTime(given),style: TextStyle(fontWeight: FontWeight.w800,color: Colors.grey),),
+                  Spacer(),
+                  InkWell(
+                    onTap: () async {
+                      DateTime? dateTime = await showOmniDateTimePicker(
+                        context: context,
+                        initialDate: given,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(
+                          const Duration(days: 7),
+                        ),
+                        is24HourMode: false,
+                        isShowSeconds: false,
+                        minutesInterval: 1,
+                        secondsInterval: 1,
+                        isForce2Digits: false,
+                        borderRadius: const BorderRadius.all(Radius.circular(16)),
+                        constraints: const BoxConstraints(
+                          maxWidth: 350,
+                          maxHeight: 650,
+                        ),
+                        transitionBuilder: (context, anim1, anim2, child) {
+                          return FadeTransition(
+                            opacity: anim1.drive(
+                              Tween(
+                                begin: 0,
+                                end: 1,
+                              ),
+                            ),
+                            child: child,
+                          );
+                        },
+                        transitionDuration: const Duration(milliseconds: 200),
+                        barrierDismissible: true,
+                        barrierColor: const Color(0x80000000),
+                        selectableDayPredicate: (dateTime) {
+                          if (dateTime == DateTime(2023, 2, 25)) {
+                            return false;
+                          } else {
+                            return true;
+                          }
+                        },
+                        type: OmniDateTimePickerType.dateAndTime,
+                        title: Text('Select Date & Time'),
+                        titleSeparator: Divider(),
+                        separator: SizedBox(height: 16),
+                        padding: EdgeInsets.all(16),
+                        insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                        theme: ThemeData.light(),
+                      );
+                      if(dateTime!=null){
+                        given=dateTime;
+                        setState(() {
+
+                        });
+                        Navigator.pop(context);
+                        _showCustomDialog(context);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Center(child: Text("Change Date & Time")),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                  InkWell(
+                    onTap: () async {
+                      Navigator.pop(context);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Color(0xff009D60),
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Center(child: Text("Confirm Date & Time",style: TextStyle(color: Colors.white),)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15,)
+                ],
+              ),
+            ),
+          );}
+      },
+    );
+  }
+  String formatDateTime(DateTime dateTime) {
+    // Format: DD MonthName, HH:MM AM/PM
+    final DateFormat formatter = DateFormat('dd MMMM, hh:mm a');
+    return formatter.format(dateTime);
+  }
+  String formatDate(DateTime dateTime) {
+    // Format: DD MonthName, HH:MM AM/PM
+    final DateFormat formatter = DateFormat('dd MMM');
+    return formatter.format(dateTime);
+  }
+  String formatTime(DateTime dateTime) {
+    // Format: DD MonthName, HH:MM AM/PM
+    final DateFormat formatter = DateFormat('hh:mm a');
+    return formatter.format(dateTime);
+  }
+  DateTime given = DateTime.now();
+
   Widget con(String str,double w)=>Padding(
     padding: const EdgeInsets.all(2.0),
     child: InkWell(

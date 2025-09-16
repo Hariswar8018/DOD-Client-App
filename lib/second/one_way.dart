@@ -1,12 +1,15 @@
 import 'package:dod/global.dart';
 import 'package:dod/second/book.dart';
+import 'package:dod/second/book_daily.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../return_functions/position.dart';
 
 class One_Way extends StatefulWidget {
-  const One_Way({super.key});
+  const One_Way({super.key,required this.dateTime,required this.i});
 
+  final DateTime dateTime;final int i ;
   @override
   State<One_Way> createState() => _One_WayState();
 }
@@ -24,7 +27,7 @@ class _One_WayState extends State<One_Way> {
               color: Colors.white
           ),
           centerTitle: true,
-          title: Text("One Way",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+          title: Text(widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
         ),
       backgroundColor: Colors.white,
       body: Column(
@@ -122,18 +125,22 @@ class _One_WayState extends State<One_Way> {
                     });
                     try {
                       controller.text = filteredPlaces[index];
+                      sets(filteredPlaces[index]);
                       double lat1 = await latitute(str);
                       double lom1 = await longitude(str);
                       double lat2 = await latitute(controller.text);
                       double lon2 = await longitude(controller.text);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) =>
-                          Book_OneWay(str: str,
-                            str2: controller.text,
-                            lat1: lat1,
-                            lon1: lom1,
-                            lat2: lat2,
-                            lon2: lon2,
-                          )));
+                      if(widget.i==3){
+
+                      }else{
+                        Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                            Book_OneWay(str: str,
+                              str2: controller.text,
+                              lat1: lat1,
+                              lon1: lom1,
+                              lat2: lat2,
+                              lon2: lon2, dateTime:widget.dateTime,
+                            )));                      }
                       setState(() {
                         on=false;
                       });
@@ -173,6 +180,11 @@ class _One_WayState extends State<One_Way> {
         )
       ],
     );
+  }
+
+  Future<void> sets(String str) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString("History",str)??"NA";
   }
 
   Future<double> latitute(String str) async {
