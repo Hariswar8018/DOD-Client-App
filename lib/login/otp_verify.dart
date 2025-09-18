@@ -32,9 +32,9 @@ class _OTP_VerifyState extends State<OTP_Verify> {
       if (user != null) {
         print("User logged in: ${user.uid}");
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>LocationPermission()));
+        Send.message(context, "Phone number verified successfully!", true);
       } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>Onboarding()));
-        print("User logged out");
+
       }
     });
   }
@@ -109,7 +109,7 @@ class _OTP_VerifyState extends State<OTP_Verify> {
       setState(() {
         on=false;
       });
-      Send.message(context, "$e", false);
+      Send.message(context, "$e", true);
     }
   }
 

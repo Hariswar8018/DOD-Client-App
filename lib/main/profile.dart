@@ -7,6 +7,14 @@ import 'package:flutter/material.dart';
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
+  String strreturn(){
+    try{
+      String phone = FirebaseAuth.instance.currentUser!.phoneNumber??"+911111111111";
+      return phone.substring(0,2)+"-"+phone.substring(2,-1);
+    }catch(e){
+      return "+91-1111111111";
+    }
+  }
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -53,7 +61,7 @@ class Profile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Ayusman Samasi",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                          Text("${FirebaseAuth.instance.currentUser?.phoneNumber ??"+917978097489"}")
+                          Text("${strreturn()}"),
                         ],
                       ),
                       Spacer(),
