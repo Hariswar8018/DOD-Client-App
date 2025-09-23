@@ -1,8 +1,13 @@
+import 'package:dio/dio.dart';
+import 'package:dod/global.dart';
 import 'package:dod/main/drivers.dart';
 import 'package:dod/main/home.dart';
 import 'package:dod/main/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../api.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -18,6 +23,53 @@ class _NavigationState extends State<Navigation> {
     Home(),
     Profile(),
   };
+
+  void initState(){
+    register();
+  }
+  Future<void> register() async {
+    Dio dio = Dio(
+      BaseOptions(
+        validateStatus: (status) {
+          return status != null && status < 500; // accept 200-499 codes as valid
+        },
+      ),
+    );
+    try {
+      print("------------------------------------------------>");
+      final response = await dio.post(
+          Api.apiurl + "register",
+          data: {
+            "provider": "mobile",
+            "firebase_id": FirebaseAuth.instance.currentUser!.uid,
+            "name": "No Name Provided",
+            "email": "num${FirebaseAuth.instance.currentUser!
+                .phoneNumber}@gmail.com",
+            "password": "",
+            "mobile": "${FirebaseAuth.instance.currentUser!
+                .phoneNumber}",
+            "platform_type": "android",
+            "role": "customer",
+            "referral_number": "NAN"
+          }, options: Options()
+      );
+      print(response);
+      if (response.statusCode == 201) {
+
+      } else if (response.statusCode == 422) {
+      } else {
+        Send.message(
+            context, "Error ${response.statusMessage}", false);
+      }
+    }catch(e){
+      print(e);
+      Send.message(
+          context, "Error ${e}", false);
+
+    }
+  }
+
+
   final PageStorageBucket bucket = PageStorageBucket();
 
   dynamic selected ;

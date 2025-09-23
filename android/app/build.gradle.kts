@@ -1,3 +1,4 @@
+
 import java.util.Properties
 import java.io.FileInputStream
 
@@ -44,9 +45,9 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = 35
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-        multiDexEnabled = true // ✅ Add this line
+        versionCode = 2
+        versionName = "1.1"
+        multiDexEnabled = true
     }
 
     signingConfigs {

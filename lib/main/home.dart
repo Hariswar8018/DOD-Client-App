@@ -365,7 +365,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              Container(
+              "kk"=="kk"?SizedBox():Container(
                 width: w,
                 color: Colors.white,
                 child: Padding(
@@ -430,7 +430,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 20,),
-              Container(
+              "kk"=="kk"?SizedBox():Container(
                 width: w-30,
                 color: Colors.green.shade100,
                 child: Padding(
@@ -445,7 +445,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 8,),
-              Container(
+              "kk"=="kk"?SizedBox():  Container(
                 width: w-30,
                 color: Colors.red.shade100,
                 child: Padding(
@@ -474,6 +474,8 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+
   void _showCustomDialog(BuildContext context) {
 
 

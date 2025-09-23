@@ -1,5 +1,6 @@
 import 'package:dod/global.dart';
 import 'package:dod/main/profile/user_screen.dart';
+import 'package:dod/other/say_no.dart';
 import 'package:dod/second/link.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -83,8 +84,19 @@ class Profile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text("Orders & Payments",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
-                    a(Icon(Icons.payment,color: Colors.green,),"Orders","Track all your Bookings in one place"),
-                    a(Icon(Icons.account_balance,color: Colors.green,),"Payments","View and Manage Payments"),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              Say_No(str: "My Orders", description: "You haven't done any Order")));
+                        },
+                        child: a(Icon(Icons.payment,color: Colors.green,),"Orders","Track all your Bookings in one place")),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              Say_No(str: "My Transactions",
+                                  description: "You haven't done any Transaction ")));
+                        },
+                        child: a(Icon(Icons.account_balance,color: Colors.green,),"Payments","View and Manage Payments")),
                   ],
                 ),
               ),
@@ -100,10 +112,15 @@ class Profile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text("Rewards & Settings",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
-                    a(Icon(Icons.send,color: Colors.green,),"Refer & Earn","Invite more than 100 Credit"),
-                    a(Icon(Icons.card_giftcard,color: Colors.green,),"DOD Black","Get 10% discount in all Cases"),
-                    a(Icon(Icons.discount,color: Colors.green,),"Offers","View all Coupons"),
-                    a(Icon(Icons.circle_sharp,color: Colors.green,),"DOD Coins","Earn Rewards for your Drivings"),
+                    "kk"=="kk"?SizedBox(): a(Icon(Icons.send,color: Colors.green,),"Refer & Earn","Invite more than 100 Credit"),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              Say_No(str: "Offers & Coupons",
+                                  description: "We don't have any Coupons or Offers")));
+                        },
+                        child: a(Icon(Icons.discount,color: Colors.green,),"Offers","View all Coupons")),
+                    "kk"=="kk"?SizedBox():a(Icon(Icons.circle_sharp,color: Colors.green,),"DOD Coins","Earn Rewards for your Drivings"),
                   ],
                 ),
               ),

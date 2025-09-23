@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class Daily_Driver extends StatefulWidget {
   const Daily_Driver({super.key});
@@ -336,6 +338,18 @@ class _Daily_DriverState extends State<Daily_Driver> {
       ),
       persistentFooterButtons: [
         InkWell(
+          onTap: (){
+            var options = {
+              'key': 'rzp_test_RJ578yxdNSR2zM',
+              'amount': price*100,
+              'name': 'Booking for Daily Driver',
+              'description': "",
+              'prefill': {
+                'contact': "${FirebaseAuth.instance.currentUser!.phoneNumber??""}",
+              }
+            };
+            _razorpay.open(options);
+          },
           child: Container(
               width: w-20,
               height: 45,
@@ -350,7 +364,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
 
     );
   }
-
+  Razorpay _razorpay = Razorpay();
   String? selectedValue; // Store the selected value
 
   // List of items for the dropdown
@@ -441,7 +455,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
   String type="Hatchbacks";
   String trasmission="Manual";
 
-  int price=369;
+  int price=99;
   bool classic=true;
   bool isSwitched = false;
   int i = 4;

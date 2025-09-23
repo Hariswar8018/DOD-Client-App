@@ -1,3 +1,4 @@
+
 # Please add these rules to your existing keep rules in order to suppress warnings.
 # This is generated automatically by the Android Gradle plugin.
 # Keep enum methods
@@ -5,7 +6,13 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
-
+-keepattributes *Annotation*
+-dontwarn com.razorpay.**
+-keep class com.razorpay.** {*;}
+-optimizations !method/inlining/
+-keepclasseswithmembers class * {
+  public void onPayment*(...);
+}
 # Keep Firebase
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.firebase.**

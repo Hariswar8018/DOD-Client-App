@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../api.dart';
 import '../global.dart';
+import '../other/say_no.dart' show Say_No;
 
 class Book_OneWay extends StatefulWidget {
   String str,str2;
@@ -24,7 +27,27 @@ class _Book_OneWayState extends State<Book_OneWay> {
   bool now = false;
   void initState(){
     given=widget.dateTime;
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+
+    print(response);
+    Send.message(context, response.toString(), false);
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+
+    print(response);
+    Send.message(context, response.toString(), false);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -363,9 +386,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                         SizedBox(height: 5),
                         InkWell(
                           onTap: (){
-                            setState(() {
-                              classic=!classic;
-                            });
+
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -392,9 +413,6 @@ class _Book_OneWayState extends State<Book_OneWay> {
                         ),
                         InkWell(
                           onTap: (){
-                            setState(() {
-                              classic=!classic;
-                            });
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(left: 8.0,right: 8),
@@ -411,9 +429,9 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   leading: CircleAvatar(
                                     backgroundImage: AssetImage("assets/plus.png"),
                                   ),
-                                  trailing: Text("₹${price+100}",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23),),
-                                  title: Text("DOD Plus",style: TextStyle(fontWeight: FontWeight.w900),),
-                                  subtitle: Text("Top-rated Veterans",style: TextStyle(color: Colors.grey.shade500),),
+                                  trailing: Text("₹${price+100}",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23,color: Colors.grey),),
+                                  title: Text("DOD Plus",style: TextStyle(fontWeight: FontWeight.w900,color: Colors.grey),),
+                                  subtitle: Text("Not Available at the moment",style: TextStyle(color: Colors.grey.shade400),),
                                 ),
                               ),
                             ),
@@ -432,36 +450,60 @@ class _Book_OneWayState extends State<Book_OneWay> {
       persistentFooterButtons: [
         Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
-              child: Row(
-                children: [
-                  Icon(Icons.discount,color: Colors.green,),
-                  Text("  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
-                  Spacer(),
-                  Container(width: 1,height: 24,color: Colors.grey,),
-                  SizedBox(width: 9),
-                  Icon(Icons.account_balance,color: Colors.green,),
-                  Text("  Cash",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
-                  SizedBox(width: 18,),
-                  Spacer(),
-                ],
+            InkWell(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                    Say_No(str: "Offers & Coupons",
+                        description: "We don't have any Coupons or Offers")));
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
+                child: Row(
+                  children: [
+                    Icon(Icons.discount,color: Colors.green,),
+                    Text("  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                    Spacer(),
+                    Container(width: 1,height: 24,color: Colors.grey,),
+                    SizedBox(width: 9),
+                    Icon(Icons.account_balance,color: Colors.green,),
+                    Text("  Cash",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                    SizedBox(width: 18,),
+                    Spacer(),
+                  ],
+                ),
               ),
             ),
-            Container(
-              width: w-10,
-              height: 45,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(6)
+            InkWell(
+              onTap: (){
+                var options = {
+                  'key': 'rzp_test_RJ578yxdNSR2zM',
+                  'amount': price*100,
+                  'name': 'Booking for Classic Driver',
+                  'description': "",
+                  'prefill': {
+                    'contact': "${FirebaseAuth.instance.currentUser!.phoneNumber??""}",
+                  }
+                };
+                _razorpay.open(options);
+              },
+              child: Container(
+                width: w-10,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(6)
+                ),
+                child: Center(child: Text("Request Classic Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
               ),
-              child: Center(child: Text("Request Classic Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
             ),
           ],
         )
       ],
     );
   }
+  Razorpay _razorpay = Razorpay();
+
+
   void _showCustomDialog(BuildContext context) {
 
 
@@ -747,6 +789,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
   }
   DateTime given = DateTime.now();
 
+  bool ki=true;
   Widget con(String str,double w)=>Padding(
     padding: const EdgeInsets.all(2.0),
     child: InkWell(
@@ -782,7 +825,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
   String type="Hatchbacks";
   String trasmission="Manual";
 
-  int price=369;
+  int price=99;
   bool classic=true;
   bool isSwitched = false;
   int i = 1;
