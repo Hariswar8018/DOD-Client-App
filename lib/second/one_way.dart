@@ -139,7 +139,7 @@ class _One_WayState extends State<One_Way> {
                               lat1: lat1,
                               lon1: lom1,
                               lat2: lat2,
-                              lon2: lon2, dateTime:widget.dateTime,
+                              lon2: lon2, dateTime:widget.dateTime, type: widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),
                             )));                      }
                       setState(() {
                         on=false;

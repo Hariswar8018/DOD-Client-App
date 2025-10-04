@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dod/global.dart';
+import 'package:dod/login/bloc/login/view.dart';
+import 'package:dod/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -83,26 +85,36 @@ class _UpdateState extends State<Update> {
             setState(() {
               on=true;
             });
-            Dio dio = Dio();
+            final Dio dio = Dio(
+              BaseOptions(
+                validateStatus: (status) => status != null && status < 500,
+              ),
+            );
             try {
               print("------------------------------------------------>");
-              final response = await dio.post(
+              final response = await dio.patch(
                   Api.apiurl + "profile-update",
-                  data: {
+                  data: widget.isemail?{
+                    "name":UserModel.user.name,
+                    "email": controller.text,
+                    "mobile": "${FirebaseAuth.instance.currentUser!.phoneNumber}",
+                  }:{
                     "name":controller.text,
-                    "email": "num${FirebaseAuth.instance.currentUser!
-                        .phoneNumber}@gmail.com",
+                    "email": UserModel.user.email,
                     "mobile": "${FirebaseAuth.instance.currentUser!
                         .phoneNumber}",
                   },
                 options: Options(
                   headers: {
-                    "Authorization": "Bearer ${Api.token}",
+                    "Authorization": "Bearer ${UserModel.token}",
                   },
                 ),
               );
               print(response);
-              if (response.statusCode == 201) {
+              print(response.statusMessage);
+              print(response.statusCode);
+              if (response.statusCode == 201||response.statusCode == 200) {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
                 Send.message(
                     context, "Success", true);
                 setState(() {

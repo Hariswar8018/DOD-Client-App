@@ -1,14 +1,16 @@
 import 'package:dod/api.dart';
 import 'package:dod/global.dart';
+import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main.dart';
 import 'package:dod/main/profile/update_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 
 class User_Profile extends StatelessWidget {
    User_Profile({super.key});
-  final dio = Dio();
+
   @override
   Widget build(BuildContext context) {
     double w=MediaQuery.of(context).size.width;
@@ -62,9 +64,9 @@ class User_Profile extends StatelessWidget {
                             Navigator.push(context,MaterialPageRoute(builder: (_)=>Update(email: "", name: "",
                                 isemail: false)));
                         },
-                        child: Text("Ayusman Samasi",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 17),)),
+                        child: Text(UserModel.user.name,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 17),)),
                     SizedBox(height: 10,),
-                    Text("Member Since : Sept 2025",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),)
+                    Text("Member Since : ${formatDate(UserModel.user.createdAt.substring(0,10))}",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),)
                   ],
                 ),
               ),
@@ -78,7 +80,7 @@ class User_Profile extends StatelessWidget {
                   isemail: true)));
             },
             leading: Icon(Icons.mail,color: Colors.grey,),
-            title: Text("hariswarsamasi@gmail.com"),
+            title: Text(UserModel.user.email),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -99,6 +101,16 @@ class User_Profile extends StatelessWidget {
        return phone.substring(0,2)+"-"+phone.substring(2,-1);
      }catch(e){
        return "+91-1111111111";
+     }
+   }
+   String formatDate(String dateStr) {
+     try {
+       // Parse the string to DateTime
+       DateTime date = DateTime.parse(dateStr);
+       // Format as "Month, Year"
+       return DateFormat('MMMM, yyyy').format(date);
+     } catch (e) {
+       return dateStr; // fallback if parsing fails
      }
    }
 }

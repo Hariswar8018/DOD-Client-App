@@ -1,7 +1,38 @@
-import 'package:bloc/bloc.dart';
+import 'package:dod/model/usermodel.dart';
+import 'package:equatable/equatable.dart';
 
-import 'state.dart';
+abstract class AuthState extends Equatable{
+  const AuthState();
 
-class LoginCubit extends Cubit<LoginState> {
-  LoginCubit() : super(LoginState().init());
+  @override
+  List<Object?> get props=>[];
 }
+
+class AuthLoading extends AuthState{}
+
+class AuthInitial extends AuthState{}
+
+class AuthSuccess extends AuthState{
+  final UserData userData;
+
+  const AuthSuccess(this.userData);
+
+  @override
+  List<Object?> get props=>[userData];
+}
+
+class AuthFailure extends AuthState {
+  final String error;
+
+  const AuthFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+
+
+
+
+
+
+

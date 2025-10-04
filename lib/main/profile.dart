@@ -1,4 +1,5 @@
 import 'package:dod/global.dart';
+import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main/profile/user_screen.dart';
 import 'package:dod/other/say_no.dart';
 import 'package:dod/second/link.dart';
@@ -44,6 +45,9 @@ class Profile extends StatelessWidget {
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (_)=>User_Profile()));
               },
+              onLongPress: (){
+                print(FirebaseAuth.instance.currentUser!.uid);
+              },
               child: Container(
                 width: w,
                 color: Colors.white,
@@ -61,7 +65,7 @@ class Profile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Ayusman Samasi",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                          Text(UserModel.user.name,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                           Text("${strreturn()}"),
                         ],
                       ),

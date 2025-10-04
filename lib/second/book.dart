@@ -1,3 +1,5 @@
+import 'package:dod/second/message/final_payment.dart';
+import 'package:dod/second/message/success.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
@@ -10,11 +12,12 @@ import '../global.dart';
 import '../other/say_no.dart' show Say_No;
 
 class Book_OneWay extends StatefulWidget {
-  String str,str2;
+  String str,str2, type;
   DateTime dateTime;
   double lat1,lat2, lon1,lon2;
+
    Book_OneWay({super.key,
-     required this.dateTime,required this.str,required this.str2,required this.lat1,
+     required this.dateTime,required this.str,required this.str2,required this.lat1,required this.type,
      required this.lat2,required this.lon1,required this.lon2});
 
   @override
@@ -27,27 +30,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
   bool now = false;
   void initState(){
     given=widget.dateTime;
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
-  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
-
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-
-    print(response);
-    Send.message(context, response.toString(), false);
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-
-    print(response);
-    Send.message(context, response.toString(), false);
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +44,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
             color: Colors.white
         ),
         centerTitle: true,
-        title: Text("Book One Way",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+        title: Text(widget.type,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
       ),
       body: Stack(
         children: [
@@ -450,18 +433,24 @@ class _Book_OneWayState extends State<Book_OneWay> {
       persistentFooterButtons: [
         Column(
           children: [
-            InkWell(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                    Say_No(str: "Offers & Coupons",
-                        description: "We don't have any Coupons or Offers")));
-              },
-              child: Padding(
+             Padding(
                 padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
                 child: Row(
                   children: [
-                    Icon(Icons.discount,color: Colors.green,),
-                    Text("  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              Say_No(str: "Offers & Coupons",
+                                  description: "We don't have any Coupons or Offers")));
+                        },
+                        child: Icon(Icons.discount,color: Colors.green,)),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              Say_No(str: "Offers & Coupons",
+                                  description: "We don't have any Coupons or Offers")));
+                        },
+                        child: Text("  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),)),
                     Spacer(),
                     Container(width: 1,height: 24,color: Colors.grey,),
                     SizedBox(width: 9),
@@ -472,19 +461,15 @@ class _Book_OneWayState extends State<Book_OneWay> {
                   ],
                 ),
               ),
-            ),
             InkWell(
               onTap: (){
-                var options = {
-                  'key': 'rzp_test_RJ578yxdNSR2zM',
-                  'amount': price*100,
-                  'name': 'Booking for Classic Driver',
-                  'description': "",
-                  'prefill': {
-                    'contact': "${FirebaseAuth.instance.currentUser!.phoneNumber??""}",
-                  }
-                };
-                _razorpay.open(options);
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>Final_Payment(
+                    couponid: couponid, triptype: widget.type=="One Way"?"oneway":(widget.type=="Round Trip"?"roundup":"outstation"), bookingtype: "upcoming",
+                    droplon: widget.lon2, droplat:widget.lat2, pickup: widget.str,
+                    pickup_longitude: widget.lon1, pickup_latitude: widget.lat1,
+                    date: given, drop: widget.str2, waitinghours: i.toDouble(), price: price.toDouble(),
+                  name: widget.type, transmission: trasmission, cartype: type,
+                )));
               },
               child: Container(
                 width: w-10,
@@ -501,7 +486,9 @@ class _Book_OneWayState extends State<Book_OneWay> {
       ],
     );
   }
-  Razorpay _razorpay = Razorpay();
+
+  String couponid="";
+
 
 
   void _showCustomDialog(BuildContext context) {

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:dod/login/bloc/login/state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../main/navigation.dart';
@@ -18,10 +20,7 @@ class _LocationPermissionState extends State<LocationPermission> {
     var status = await Permission.location.request();
 
     if (status.isGranted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => Navigation()),
-      );
+      _navigateToNextScreen();
     } else if (status.isDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Location Permission Denied")),
@@ -69,7 +68,9 @@ class _LocationPermissionState extends State<LocationPermission> {
   void _navigateToNextScreen() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => Navigation()),
+      MaterialPageRoute(builder: (_) => BlocProvider(
+          create: (_) => AuthCubit()..registerOrLogin(),
+          child: Navigation())),
     );
   }
 
