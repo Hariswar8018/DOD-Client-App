@@ -77,7 +77,15 @@ class _One_WayState extends State<One_Way> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("  $str",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 14),),
+                          InkWell(
+                            onTap:(){
+
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10.0),
+                              child: Text("$str",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 14),),
+                            ),
+                          ),
                           SizedBox(height: 14,),
                           Container(
                             width: w-15-20-20-20-15,
@@ -196,7 +204,7 @@ class _One_WayState extends State<One_Way> {
     return locations.first.longitude;
   }
 
-  String str = "MAS Railway Station, Chennai, India, 600001";
+  String str = Global.mylocation;
 
   List<String> filteredPlaces = [];
 

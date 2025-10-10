@@ -1,5 +1,9 @@
+import 'package:dod/main/navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+
+import '../../login/bloc/login/state.dart';
 
 class BookingSuccess extends StatelessWidget {
   DateTime time; String address, tid;
@@ -54,14 +58,24 @@ class BookingSuccess extends StatelessWidget {
         ],
       ),
       persistentFooterButtons: [
-        Container(
-          width: w-10,
-          height: 45,
-          decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(6)
+        InkWell(
+          onTap: (){
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => BlocProvider(
+                  create: (_) => AuthCubit()..registerOrLogin(),
+                  child: Navigation())),
+            );
+          },
+          child: Container(
+            width: w-10,
+            height: 45,
+            decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(6)
+            ),
+            child: Center(child: Text("Proceed",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
           ),
-          child: Center(child: Text("Proceed",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
         ),
       ],
     );

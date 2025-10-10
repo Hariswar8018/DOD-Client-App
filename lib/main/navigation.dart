@@ -11,6 +11,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../api.dart';
@@ -29,6 +31,31 @@ class _NavigationState extends State<Navigation> {
     Home(),
     Profile(),
   };
+  
+  void initState(){
+    v();
+  }
+  
+  v() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks.first;
+    String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
+    setState(() {
+      Global.mylocation=mynew;
+      Global.mylat=position.latitude;
+      Global.mylong=position.longitude;
+    });
+
+  }
 
 
   final PageStorageBucket bucket = PageStorageBucket();
@@ -47,7 +74,7 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context){
     return BlocConsumer<AuthCubit,AuthState>(
-        listener: (context,state){
+        listener: (context,state) async {
           if(state is AuthFailure){
             setState(() {
               iserror=true;
@@ -57,6 +84,23 @@ class _NavigationState extends State<Navigation> {
             Send.message(context, "${state.error}", false);
           }
           if(state is AuthSuccess){
+            Position position = await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high,
+            );
+
+            print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
+            List<Placemark> placemarks = await placemarkFromCoordinates(
+              position.latitude,
+              position.longitude,
+            );
+
+            Placemark place = placemarks.first;
+            String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
+            setState(() {
+              Global.mylocation=mynew;
+              Global.mylat=position.latitude;
+              Global.mylong=position.longitude;
+            });
             print("Token => ${state.userData.name}");
             setState(() {
               UserModel.user=state.userData;

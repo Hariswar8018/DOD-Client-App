@@ -3,6 +3,7 @@ import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main/profile/user_screen.dart';
 import 'package:dod/other/say_no.dart';
 import 'package:dod/second/link.dart';
+import 'package:dod/second/pages/my_bookings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -91,7 +92,7 @@ class Profile extends StatelessWidget {
                     InkWell(
                         onTap: (){
                           Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                              Say_No(str: "My Orders", description: "You haven't done any Order")));
+                              MyBookings()));
                         },
                         child: a(Icon(Icons.payment,color: Colors.green,),"Orders","Track all your Bookings in one place")),
                     InkWell(

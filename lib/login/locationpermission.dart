@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:dod/login/bloc/login/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../global.dart';
 import '../main/navigation.dart';
 
 class LocationPermission extends StatefulWidget {
@@ -20,6 +23,8 @@ class _LocationPermissionState extends State<LocationPermission> {
     var status = await Permission.location.request();
 
     if (status.isGranted) {
+      v();
+
       _navigateToNextScreen();
     } else if (status.isDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -32,6 +37,27 @@ class _LocationPermissionState extends State<LocationPermission> {
       openAppSettings();
     }
   }
+  v() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks.first;
+    String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
+    setState(() {
+      Global.mylocation=mynew;
+      Global.mylat=position.latitude;
+      Global.mylong=position.longitude;
+    });
+
+  }
+
 
   Timer? _timer; // Store the timer
 
@@ -45,6 +71,7 @@ class _LocationPermissionState extends State<LocationPermission> {
   @override
   void initState(){
     requestLocationPermission(context);
+    v();
     startTimer();
   }
   Future<void> startTimer() async {
@@ -57,15 +84,19 @@ class _LocationPermissionState extends State<LocationPermission> {
 
     // Start periodic timer only if permission is not granted yet
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      v();
       var currentStatus = await Permission.locationWhenInUse.status;
       if (currentStatus.isGranted) {
         timer.cancel(); // Cancel timer when permission is granted
         _navigateToNextScreen();
+        v();
+
       }
     });
   }
 
   void _navigateToNextScreen() {
+    v();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => BlocProvider(

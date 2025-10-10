@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart' as lk;
-import 'package:my_location_library21/my_location_library21.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,27 +22,10 @@ class Drivers extends StatefulWidget {
 class _DriversState extends State<Drivers> {
   final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
-  //call function
-  Future<void> _getCurrentLocation() async {
-    print("Find");
-    lk.LocationData? locationData = await LocationService.getCurrentLocation();
-
-    mylat=(await locationData!.longitude)!;
-    mylong=(await locationData!.longitude)!;
-    setState(() {
-
-    });
-
-    print('Current Location Latitude: ${locationData?.latitude}');
-    print('Current Location  Longitude: ${locationData?.longitude}');
-
-
-  }
 
   // initialized the function
   void initState() {
     super.initState();
-    _getCurrentLocation();
     getvalue();
   }
 
@@ -84,7 +66,6 @@ class _DriversState extends State<Drivers> {
                       children: [
                         InkWell(
                             onTap: (){
-                              _getCurrentLocation();
                             },
                             child: Text("Hire Drivers",style: TextStyle(fontSize: 19,fontWeight: FontWeight.w800,color: Colors.white),)),
                         Spacer(),

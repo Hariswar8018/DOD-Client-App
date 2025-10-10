@@ -10,7 +10,15 @@ class Global{
 
   static Color black = Color(0xff25252D);
 
- static List<String> places = [
+
+  static late String mylocation ;
+
+  String s ="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
+
+
+  static late double mylat,mylong;
+
+  static List<String> places = [
     "Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002" ,  // main railway station :contentReference[oaicite:0]{index=0}
     "Divisional Railway Manager's Office, Amdupura, Naroda Road, Ahmedabad, Gujarat 382345" ,  // Western Railway administrative office :contentReference[oaicite:1]{index=1}
     "Gheekanta Metro Station, Old City, Gheekanta, Bhadra, Ahmedabad, Gujarat 380001" ,  // metro station on Blue Line :contentReference[oaicite:2]{index=2}

@@ -5,8 +5,9 @@ import 'package:dod/return_functions/location.dart';
 import 'package:dod/second/one_way.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart' show Placemark, placemarkFromCoordinates;
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
-import 'package:my_location_library21/my_location_library21.dart';
 import 'package:location/location.dart' as lk;
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:intl/intl.dart';
@@ -25,33 +26,37 @@ class _HomeState extends State<Home> {
   final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
 
-  //call function
-  Future<void> _getCurrentLocation() async {
-    print("Find");
-    lk.LocationData? locationData = await LocationService.getCurrentLocation();
-
-    mylat=(await locationData!.longitude)!;
-    mylong=(await locationData!.longitude)!;
-    setState(() {
-
-    });
-
-    print('Current Location Latitude: ${locationData?.latitude}');
-    print('Current Location  Longitude: ${locationData?.longitude}');
-
-
-  }
-
-
   // initialized the function
 
   void initState() {
     super.initState();
-    _getCurrentLocation();
     getvalue();
+    v();
+    setState(() {
+
+    });
+  }
+  v() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks.first;
+    String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
+    setState(() {
+      Global.mylocation=mynew;
+      Global.mylat=position.latitude;
+      Global.mylong=position.longitude;
+    });
+
   }
 
-  double mylat=23.0225,mylong=72.5714;
 
   String home = "NA";
 
@@ -92,7 +97,6 @@ class _HomeState extends State<Home> {
                               children: [
                                 InkWell(
                                     onTap: (){
-                                      _getCurrentLocation();
                                     },
                                     child: Text("Hire Drivers",style: TextStyle(fontSize: 19,fontWeight: FontWeight.w800,color: Colors.white),)),
                                 Spacer(),
@@ -114,12 +118,12 @@ class _HomeState extends State<Home> {
                                   apiKey: Api.googlemap,
                                   key: mapsWidgetController,
                                   sourceLatLng: LatLng(
-                                    mylat,
-                                    mylong,
+                                    Global.mylat,
+                                    Global.mylong,
                                   ),
                                   destinationLatLng: LatLng(
-                                    mylat,
-                                    mylong,
+                                    Global.mylat,
+                                    Global.mylong,
                                   ),
                                   updatePolylinesOnDriverLocUpdate: true,
                                   onPolylineUpdate: (_) {
@@ -283,7 +287,7 @@ class _HomeState extends State<Home> {
                                                   SizedBox(width: 10),
                                                   Text("My Location : ", style: TextStyle(color: Colors.green)),
                                                   Text(
-                                                    mylocation.length > 27 ? mylocation.substring(0, 27) + '...' : mylocation,
+                                                    Global.mylocation.length > 27 ? Global.mylocation.substring(0, 27) + '...' : Global.mylocation,
                                                     style: TextStyle(color: Colors.black),
                                                   ),
                                                 ],
@@ -329,7 +333,7 @@ class _HomeState extends State<Home> {
                               String s =await Navigator.push(context, MaterialPageRoute(builder: (_)=>Location()));
                               if(s!=null){
                                 setState(() {
-                                  mylocation=s;
+                                  Global.mylocation=s;
                                 });
                               }
                             },
@@ -345,12 +349,12 @@ class _HomeState extends State<Home> {
                                       String s =await Navigator.push(context, MaterialPageRoute(builder: (_)=>Location()));
                                       if(s!=null){
                                         setState(() {
-                                          mylocation=s;
+                                          Global.mylocation=s;
                                         });
                                       }
                                     },
                                     child: Text(
-                                      mylocation.length > 34 ? mylocation.substring(0, 34) + '...' : mylocation,
+                                      Global.mylocation.length > 34 ? Global.mylocation.substring(0, 34) + '...' : Global.mylocation,
                                       style: TextStyle(color: Colors.black),
                                     ),
                                   ),
@@ -365,7 +369,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              "kk"=="kk"?SizedBox():Container(
+              Container(
                 width: w,
                 color: Colors.white,
                 child: Padding(
@@ -430,7 +434,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 20,),
-              "kk"=="kk"?SizedBox():Container(
+              Container(
                 width: w-30,
                 color: Colors.green.shade100,
                 child: Padding(
@@ -445,7 +449,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 8,),
-              "kk"=="kk"?SizedBox():  Container(
+              Container(
                 width: w-30,
                 color: Colors.red.shade100,
                 child: Padding(
@@ -787,7 +791,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  String mylocation="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
+
 
   TextEditingController controller=TextEditingController();
 

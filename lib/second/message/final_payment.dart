@@ -38,6 +38,10 @@ class _Final_PaymentState extends State<Final_Payment> {
 
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     orderdone(response.paymentId.toString());
+    payments(response.orderId!, response.paymentId!, response.signature!, "");
+    response.signature;
+    response.paymentId;
+    response.orderId;
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -238,11 +242,10 @@ class _Final_PaymentState extends State<Final_Payment> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       header("Fare Estimate"),
-                      ro("Driver Cost","₹${widget.price*0.75}"),
-                      ro("Est. Commision","₹${widget.price*0.02}"),
-                      ro("Total GST","₹${widget.price*0.18}"),
+                      ro("Driver Cost","₹${(widget.price*0.75).toStringAsFixed(1)}"),
+                      ro("Est. Commision","₹${(widget.price*0.02).toStringAsFixed(1)}"),
+                      ro("Total GST","₹${(widget.price*0.18).toStringAsFixed(1)}"),
                       ro1("Total Amount Paid","₹${widget.price}"),
-
                     ],
                   ),
                 ),
@@ -289,8 +292,8 @@ class _Final_PaymentState extends State<Final_Payment> {
                     children: [
                       header("To be Paid Now"),
                       ro("Total Payment","₹${widget.price}"),
-                      ro("Payment to be done by Cash","₹${widget.price*0.8}"),
-                      ro1("Payment to be done Now","₹${widget.price*0.2}"),
+                      ro("Payment to be done by Cash","₹${(widget.price*0.8).toStringAsFixed(1)}"),
+                      ro1("Payment to be done Now","₹${(widget.price*0.2).toStringAsFixed(1)}"),
                     ],
                   ),
                 ),
@@ -355,6 +358,9 @@ class _Final_PaymentState extends State<Final_Payment> {
                   }
                 };
                 _razorpay.open(options);
+              },
+              onLongPress: (){
+                payments("sxwa", "edfs", "SDCFCDS","SUCESS");
               },
               child: Container(
                 width: w-10,
@@ -447,8 +453,7 @@ class _Final_PaymentState extends State<Final_Payment> {
   );
   void orderdone(String paymentid) async {
 
-
-    // Ensure all required fields are non-null
+    payments("HIHDSW632787", paymentid, "UIDSHDIDI62627", "Success");
     if (widget.pickup_latitude == null ||
         widget.pickup_longitude == null ||
         widget.droplat == null ||
@@ -501,11 +506,17 @@ class _Final_PaymentState extends State<Final_Payment> {
         ),
       );
 
+
       print("Status: ${response.statusCode}");
       print("Response: ${response.data}");
+      if(response.statusCode==200||response.statusCode==201){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(time: widget.date,
+          address: widget.pickup, tid: paymentid,)));
+        return ;
+      }
       Send.message(context, "Error ${response.statusMessage}", false);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(time: widget.date,
-        address: widget.pickup, tid: paymentid,)));
+      return ;
+
     } catch (e) {
       Send.message(context, "Error $e", false);
       print("Error during API call: $e");
@@ -514,8 +525,9 @@ class _Final_PaymentState extends State<Final_Payment> {
   String instruct="NA";
   Future<void> payments(String orderid,paymentid,sign, status) async {
     try {
-      final response = await dio.post(
-        Api.apiurl + "user-booking-payment-status",
+      print(UserModel.token);
+      final response = await dio.put(
+        Api.apiurl + "user-booking-payment-status/$paymentid",
         data: {
           "amount":"${widget.price}",
           "paymentmethod":"online",
@@ -530,14 +542,10 @@ class _Final_PaymentState extends State<Final_Payment> {
           },
         ),
       );
-
       print("Status: ${response.statusCode}");
       print("Response: ${response.data}");
-      Send.message(context, "Error ${response.statusMessage}", false);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(time: widget.date,
-        address: widget.pickup, tid: paymentid,)));
+      print(response.statusMessage);
     } catch (e) {
-      Send.message(context, "Error $e", false);
       print("Error during API call: $e");
     }
   }

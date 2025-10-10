@@ -3,9 +3,19 @@ import 'package:dod/global.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_widget/google_maps_widget.dart';
 import 'package:place_picker_google/place_picker_google.dart';
+import 'package:map_location_picker/map_location_picker.dart';
 
-class Position extends StatelessWidget {
-  const Position({super.key});
+class Position extends StatefulWidget {
+   Position({super.key});
+
+  @override
+  State<Position> createState() => _PositionState();
+}
+
+class _PositionState extends State<Position> {
+  LatLng? _pickedLocation;
+
+  String _formattedAddress = "";
 
   @override
   Widget build(BuildContext context) {
@@ -19,27 +29,18 @@ class Position extends StatelessWidget {
         centerTitle: true,
         title: Text("Select Location",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
       ),
-      body: PlacePicker(
-        apiKey: Api.googlemap,
-        onPlacePicked: (LocationResult result) {
-          debugPrint("Place picked: ${result.formattedAddress}");
-        },
-        initialLocation: LatLng(
-          29.378586,
-          47.990341,
+      body: MapLocationPicker(
+        key: Key(Api.googlemap),
+        searchConfig: SearchConfig(
+          apiKey: "",
+
         ),
-        searchInputConfig: const SearchInputConfig(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 8.0,
-          ),
-          autofocus: false,
-          textDirection: TextDirection.ltr,
-        ),
-        searchInputDecorationConfig: const SearchInputDecorationConfig(
-          hintText: "Search for a building, street or ...",
+        geoCodingConfig: GeoCodingConfig(apiKey: Api.googlemap,),
+        config: MapLocationPickerConfig(
+          initialPosition: LatLng(Global.mylat, Global.mylong),
         ),
       ),
+      persistentFooterButtons: [],
     );
   }
 }
