@@ -4,10 +4,13 @@ import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart
 
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class Daily_Driver extends StatefulWidget {
-  const Daily_Driver({super.key});
+  final String pickup, drop;
+  const
+  Daily_Driver({super.key,required this.pickup, required this.drop});
 
   @override
   State<Daily_Driver> createState() => _Daily_DriverState();
@@ -62,7 +65,39 @@ class _Daily_DriverState extends State<Daily_Driver> {
                           SizedBox(width: 15,),
                           Icon(Icons.import_export,color: Colors.green,),
                           SizedBox(width: 10,),
-                          Text("Select Pickup Location",),
+                          Container(
+                              width: w-90,
+                              child: Text(widget.pickup,style: TextStyle(fontSize: 12),)),
+                          SizedBox(width: 8,),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      width: w-20,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4), // Rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1), // Shadow color
+                            spreadRadius: 1, // How much the shadow spreads
+                            blurRadius: 6, // Softness of the shadow
+                            offset: Offset(0, 3), // Shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 15,),
+                          Icon(Icons.import_export,color: Colors.green,),
+                          SizedBox(width: 10,),
+                          Container(
+                              width: w-90,
+                              child: Text(widget.drop,style: TextStyle(fontSize: 12),)),
                           SizedBox(width: 8,)
                         ],
                       ),
@@ -290,6 +325,102 @@ class _Daily_DriverState extends State<Daily_Driver> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 22),
+                  Text("   Select Pickup Dates ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                  SizedBox(height: 10,),
+                  Center(
+                    child: InkWell(
+                      onTap: () async {
+                        List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+                          context: context,
+                          startInitialDate: DateTime.now(),
+                          startFirstDate: DateTime.now(),
+                          startLastDate: DateTime.now().add(
+                            const Duration(days: 10),
+                          ),
+                          endInitialDate: DateTime.now(),
+                          endFirstDate:DateTime.now(),
+                          endLastDate: DateTime.now().add(
+                            const Duration(days: 30),
+                          ),
+                          is24HourMode: false,
+                          isShowSeconds: false,
+                          minutesInterval: 1,
+                          secondsInterval: 1,
+                          isForce2Digits: false,
+                          isForceEndDateAfterStartDate: true,
+                          onStartDateAfterEndDateError: () {
+                            // Handle error when start date is after end date
+                            print('Start date cannot be after end date!');
+                          },
+                          borderRadius: const BorderRadius.all(Radius.circular(16)),
+                          constraints: const BoxConstraints(
+                            maxWidth: 350,
+                            maxHeight: 650,
+                          ),
+                          transitionBuilder: (context, anim1, anim2, child) {
+                            return FadeTransition(
+                              opacity: anim1.drive(
+                                Tween(
+                                  begin: 0,
+                                  end: 1,
+                                ),
+                              ),
+                              child: child,
+                            );
+                          },
+                          transitionDuration: const Duration(milliseconds: 200),
+                          barrierDismissible: true,
+                          barrierColor: Colors.black54,
+                          startSelectableDayPredicate: (dateTime) {
+                            if (dateTime == DateTime(2023, 2, 25)) {
+                              return false;
+                            } else {
+                              return true;
+                            }
+                          },
+                          endSelectableDayPredicate: (dateTime) {
+                            // Disable 26th Feb 2023 for end date
+                            if (dateTime == DateTime(2023, 2, 26)) {
+                              return false;
+                            } else {
+                              return true;
+                            }
+                          },
+                          type: OmniDateTimePickerType.date,
+                          title: Text('Select Date & Time Range'),
+                          titleSeparator: Divider(),
+                          startWidget: Text('Start'),
+                          endWidget: Text('End'),
+                          separator: SizedBox(height: 16),
+                          defaultTab: DefaultTab.start,
+                          padding: EdgeInsets.all(16),
+                          insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                          theme: ThemeData.light(),
+                        );
+                        if(dateTimeList!=null){
+                          date=dateTimeList;
+                          setState(() {
+
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: w - 20,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                          ),
+                          borderRadius: BorderRadius.circular(5), // Optional rounded corners
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(date.isNotEmpty?"${date.length} Dates Chosen":"Choose Dates",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
+                        )
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -330,7 +461,6 @@ class _Daily_DriverState extends State<Daily_Driver> {
 
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -339,16 +469,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
       persistentFooterButtons: [
         InkWell(
           onTap: (){
-            var options = {
-              'key': 'rzp_test_RJ578yxdNSR2zM',
-              'amount': price*100,
-              'name': 'Booking for Daily Driver',
-              'description': "",
-              'prefill': {
-                'contact': "${FirebaseAuth.instance.currentUser!.phoneNumber??""}",
-              }
-            };
-            _razorpay.open(options);
+
           },
           child: Container(
               width: w-20,
@@ -364,6 +485,8 @@ class _Daily_DriverState extends State<Daily_Driver> {
 
     );
   }
+
+  List<DateTime> date = [];
   Razorpay _razorpay = Razorpay();
   String? selectedValue; // Store the selected value
 

@@ -33,7 +33,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
   void initState() {
     super.initState();
@@ -65,14 +64,12 @@ class _HomeState extends State<Home> {
         throw Exception("Location permission permanently denied");
       }
 
-      // Step 2: Get Current Position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
       print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
 
-      // Step 3: Optionally get address (not required, but you can keep if needed)
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -202,46 +199,7 @@ class _HomeState extends State<Home> {
                           color: Global.grey,
                           child: Stack(
                             children: [
-                              Container(
-                                width: w,
-                                height: 220,
-                                child: FutureBuilder<LatLng>(
-                                  future: getCurrentLocation(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return Container(
-                                        color: Colors.grey.shade100,
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Image.network(width: w/3,"https://logos-world.net/wp-content/uploads/2022/01/Google-Maps-Logo.png"),
-                                            Text("Loading Google Map.... Please Wait"),
-                                          ],
-                                        ),
-                                      );
-                                    }
-
-                                    if (snapshot.hasError || !snapshot.hasData) {
-                                      return Container(
-                                        color: Colors.grey.shade100,
-                                        child: const Center(child: Text("Location not available")),
-                                      );
-                                    }
-                                    final LatLng location = snapshot.data!;
-                                    return GoogleMapsWidget(
-                                      apiKey: Api.googlemap,
-                                      key: mapsWidgetController,
-                                      sourceLatLng: location,
-                                      destinationLatLng: location,
-                                      updatePolylinesOnDriverLocUpdate: true,
-                                      onPolylineUpdate: (_) => print("Polyline updated"),
-                                      totalTimeCallback: (time) => print(time),
-                                      totalDistanceCallback: (distance) => print(distance),
-                                    );
-                                  },
-                                ),
-                              ),
+                              GoogleMap3(),
                               Padding(
                                 padding: const EdgeInsets.only(top: 210.0),
                                 child: Column(

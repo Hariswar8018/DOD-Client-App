@@ -13,7 +13,6 @@ class Global{
 
   static late String mylocation  ="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur";
 
-  String s ="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
 
   static late double? mylat,mylong;
 

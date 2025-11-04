@@ -36,10 +36,12 @@ class _PositionState extends State<Position> {
         ),
         geoCodingConfig: GeoCodingConfig(apiKey: Api.googlemap,),
         config: MapLocationPickerConfig(
-          initialPosition: LatLng(Global.mylat!, Global.mylong!),onAddressSelected: (GeocodingResult? result) {
+          initialPosition: LatLng(Global.mylat!, Global.mylong!),onNext: (GeocodingResult? result) {
           print("---------------------");
           if (result != null) {
             print("$result");
+            print(result.formattedAddress);
+            print(result.addressComponents.toString());
             double lat = result.geometry!.location.lat;
             double lng = result.geometry!.location.lng;
             String address = result.formattedAddress ?? "Address not found";

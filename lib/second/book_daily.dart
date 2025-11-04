@@ -1,6 +1,8 @@
 import 'package:dod/second/shedule_book_confirm.dart';
 import 'package:flutter/material.dart';
 
+import 'one_way.dart';
+
 class Daily extends StatelessWidget {
   const Daily({super.key});
 
@@ -39,7 +41,9 @@ class Daily extends StatelessWidget {
       persistentFooterButtons: [
         InkWell(
           onTap: (){
-            Navigator.push(context, MaterialPageRoute(builder: (_)=>Daily_Driver()));
+            Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way(dateTime: DateTime.now(),i: 3,)));
+            return ;
+
           },
           child: Container(
             width: w-20,

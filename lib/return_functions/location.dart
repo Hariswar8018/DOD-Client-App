@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' as df;
 import 'package:map_location_picker/map_location_picker.dart' as dk;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../main/googlemap.dart';
 import '../return_functions/position.dart' ;
 
 
@@ -56,7 +57,7 @@ class _LocationState extends State<Location> {
           color: Colors.white
         ),
         centerTitle: true,
-        title: Text("Search Location",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+        title: Text("Choose Your Location",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
       ),
       body: Column(
         children: [
@@ -142,7 +143,7 @@ class _LocationState extends State<Location> {
             width: w-10,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.black,
               borderRadius: BorderRadius.circular(8)
             ),
             child: Row(
@@ -150,7 +151,7 @@ class _LocationState extends State<Location> {
               children: [
                 Icon(Icons.add_location,color: Colors.green,),
                 SizedBox(width: 7,),
-                Text("Locate on the Map",style: TextStyle(fontWeight: FontWeight.w800),)
+                Text("Locate on the Map",style: TextStyle(fontWeight: FontWeight.w800,color: Colors.white),)
               ],
             ),
           ),

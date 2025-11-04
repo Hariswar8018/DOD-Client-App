@@ -77,9 +77,8 @@ class _Book_OneWayState extends State<Book_OneWay> {
                           onPolylineUpdate: (_) {
                             print("Polyline updated");
                           },
-                          // mock stream
                           totalTimeCallback: (time) => print(time),
-                          totalDistanceCallback: (distance) => print(distance),
+                          totalDistanceCallback: (distance) => print(distance),zoomGesturesEnabled: true,zoomControlsEnabled: true,
                         ),
                       ),
                       Spacer(),
@@ -492,8 +491,6 @@ class _Book_OneWayState extends State<Book_OneWay> {
 
 
   void _showCustomDialog(BuildContext context) {
-
-
     showDialog(
       context: context,
       barrierDismissible: true, // Tap outside to close
