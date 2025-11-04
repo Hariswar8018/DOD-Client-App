@@ -1,11 +1,21 @@
+import 'dart:math';
+
+import 'package:dio/dio.dart';
+import 'package:dod/second/message/success.dart' show BookingSuccess;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+
+import '../api.dart';
+import '../global.dart';
+import '../login/bloc/login/view.dart';
 
 class Daily_Driver extends StatefulWidget {
   final String pickup, drop;
@@ -265,7 +275,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
                     ],
                   ),
                   SizedBox(height: 15,),
-                  Row(
+                  ""==""?SizedBox():Row(
                     children: [
                       Text("   Trip is DOD Secured ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                       Spacer(),
@@ -399,7 +409,8 @@ class _Daily_DriverState extends State<Daily_Driver> {
                           theme: ThemeData.light(),
                         );
                         if(dateTimeList!=null){
-                          date=dateTimeList;
+                          List<DateTime> allDates = getDatesBetween(dateTimeList.first, dateTimeList.last);
+                            date=allDates;
                           setState(() {
 
                           });
@@ -416,13 +427,13 @@ class _Daily_DriverState extends State<Daily_Driver> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(date.isNotEmpty?"${date.length} Dates Chosen":"Choose Dates",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
+                          child: Text(date.isNotEmpty?"${date.length} Days Chosen":"Choose Dates",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
                         )
                       ),
                     ),
                   ),
                   SizedBox(height: 12),
-                  Row(
+                  ""==""?SizedBox():Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("   Select Driver Language ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
@@ -467,9 +478,13 @@ class _Daily_DriverState extends State<Daily_Driver> {
           )
       ),
       persistentFooterButtons: [
-        InkWell(
-          onTap: (){
-
+        progress ? Center(child: CircularProgressIndicator(),):InkWell(
+          onTap: () async {
+            if(date.isEmpty){
+              Send.message(context, "Choose Date", false);
+              return ;
+            }
+            start();
           },
           child: Container(
               width: w-20,
@@ -484,6 +499,178 @@ class _Daily_DriverState extends State<Daily_Driver> {
       ],
 
     );
+  }
+  Future<void> start() async {
+
+
+    on(true);
+    final Dio dio = Dio(
+      BaseOptions(
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+    String utcString = date.last.toUtc().toIso8601String();
+
+    double dlat = await latitute(widget.drop);
+    double dlon = await latitute(widget.drop);
+
+    double plat = await latitute(widget.pickup);
+    double plon = await latitute(widget.pickup);
+    double distance = double.parse(
+      haversine(plat, plon, dlat, dlon).toStringAsFixed(2),
+    );
+    List<Map<String, dynamic>> allRoutes = [];
+    List<DateTime> dates = date;
+
+    final result = getPickupAndDropTime("9:00 AM", 3);
+
+    String drop = result['pickup']!;
+    String drop2=result['drop']!;
+
+    for (final date in dates) {
+      allRoutes.addAll([
+        {
+          "pickup_location": widget.pickup,
+          "pickup_latitude": plat,
+          "pickup_longitude": plon,
+          "drop_location": widget.drop,
+          "drop_latitude": dlat,
+          "drop_longitude": dlon,
+          "pickup_time": drop,
+          "drop_time": drop2,
+          "date": "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        },
+        {
+          "pickup_location": widget.drop,
+          "pickup_latitude": dlat,
+          "pickup_longitude": dlon,
+          "drop_location": widget.pickup,
+          "drop_latitude": plat,
+          "drop_longitude": plon,
+          "pickup_time": drop,
+          "drop_time":drop2,
+          "date": "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        },
+      ]);
+    }
+
+    final List<String> days = dates.map((d) => [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ][d.weekday - 1])
+        .toSet()
+        .toList();
+
+    final data = {
+      "coupon_id": "",
+      "booking_type": "monthly",
+      "trip_type": "upcoming",
+      "status": "pending",
+      "paymentmethod": "cash",
+      "pickup_location": widget.pickup,
+      "pickup_latitude": plat,
+      "pickup_longitude": plon,
+      "drop_location": widget.drop,
+      "drop_latitude": dlat,
+      "drop_longitude": dlon,
+      "booking_time": utcString,
+      "distance_km": distance.toInt() + 10,
+      "waiting_hours": i,
+      "routes": allRoutes,
+      "start_date":
+      "${dates.first.year}-${dates.first.month.toString().padLeft(2, '0')}-${dates.first.day.toString().padLeft(2, '0')}",
+      "end_date":
+      "${dates.last.year}-${dates.last.month.toString().padLeft(2, '0')}-${dates.last.day.toString().padLeft(2, '0')}",
+      "days": days,
+    };
+
+
+    print("Sending payload: $data");
+
+    try {
+      final response = await dio.post(
+        Api.apiurl + "user-booking-create",
+        data: data,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer ${UserModel.token}",
+          },
+        ),
+      );
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.data}");
+      if(response.statusCode==200||response.statusCode==201){
+        on(false);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(
+          time: date.last,
+          address: widget.pickup, tid: "${DateTime.now().millisecondsSinceEpoch}",)));
+        return ;
+      }
+      on(false);
+
+      Send.message(context, "Error ${response.statusMessage}", false);
+      return ;
+
+    } catch (e) {
+      on(false);
+
+      Send.message(context, "Error $e", false);
+      print("Error during API call: $e");
+    }
+  }
+  bool progress = false;
+  void on(bool given){
+    setState(() {
+      progress=given;
+    });
+  }
+
+  Map<String, String> getPickupAndDropTime(String pickupTimeStr, int addHours) {
+    // Define a formatter to parse 12-hour format time like "9:00 AM"
+    final DateFormat inputFormat = DateFormat('h:mm a');
+
+    // Parse pickup time
+    DateTime pickupTime = inputFormat.parse(pickupTimeStr);
+
+    // Add hours to get drop time
+    DateTime dropTime = pickupTime.add(Duration(hours: addHours));
+
+    // Format both times back to 12-hour format
+    final DateFormat outputFormat = DateFormat('h:mm a');
+    String formattedPickup = outputFormat.format(pickupTime);
+    String formattedDrop = outputFormat.format(dropTime);
+
+    return {
+      "pickup": formattedPickup,
+      "drop": formattedDrop,
+    };
+  }
+
+  Future<double> latitute(String str) async {
+    List<Location> locations = await locationFromAddress(str);
+    return locations.first.latitude;
+  }
+  Future<double> longitude(String str) async {
+    List<Location> locations = await locationFromAddress(str);
+    return locations.first.longitude;
+  }
+  List<DateTime> getDatesBetween(DateTime start, DateTime end) {
+
+    if (start.isAfter(end)) {
+      final temp = start;
+      start = end;
+      end = temp;
+    }
+
+    int totalDays = end.difference(start).inDays;
+    return List.generate(totalDays + 1, (index) {
+      return DateTime(start.year, start.month, start.day + index);
+    });
   }
 
   List<DateTime> date = [];
@@ -515,6 +702,25 @@ class _Daily_DriverState extends State<Daily_Driver> {
 
   List selectedValue1 = []; // Store the selected value
 
+  int haversine(double lat1, double lon1, double lat2, double lon2) {
+    try {
+      const R = 6371; // Earth's radius in km
+
+      double toRad(double degree) => degree * pi / 180;
+
+      final dLat = toRad(lat2 - lat1);
+      final dLon = toRad(lon2 - lon1);
+
+      final a = sin(dLat / 2) * sin(dLat / 2) +
+          cos(toRad(lat1)) * cos(toRad(lat2)) *
+              sin(dLon / 2) * sin(dLon / 2);
+      final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+      return (R * c).toInt();
+    }catch(e){
+      return 10;
+    }
+  }
 
   final List<String> item = [
     "English",

@@ -13,13 +13,13 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class Final_Payment extends StatefulWidget {
   String couponid, bookingtype, triptype, pickup ,drop,name,transmission, cartype;
-  double waitinghours,pickup_longitude, pickup_latitude,droplat, droplon ;
+  double waitinghours,pickup_longitude, pickup_latitude,droplat, droplon ; String discount;
   double price;
   DateTime date;
    Final_Payment({super.key,required this.couponid,required this.triptype,
     required this.bookingtype,required this.droplon,required this.droplat,required this.name,
     required this.pickup,required this.pickup_longitude,required this.pickup_latitude,
-     required this.transmission,required this.cartype,
+     required this.transmission,required this.cartype,required this.discount,
     required this.date,required this.drop,required this.waitinghours,required this.price});
 
   @override
@@ -30,7 +30,38 @@ class _Final_PaymentState extends State<Final_Payment> {
 
   Razorpay _razorpay = Razorpay();
 
+  vsdiscount() async {
+    if(widget.discount.isNotEmpty){
+      try {
+        final response = await dio.post(
+          Api.apiurl + "user-apply-coupon",
+          data: {
+            "code":widget.discount,
+            "order_amount":widget.price,
+          },
+          options: Options(
+            headers: {"Authorization": "Bearer ${UserModel.token}"},
+          ),
+        );
+
+        print("Status: ${response.statusCode}");
+        print("Response: ${response.data}");
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+
+          return;
+        }
+
+        Send.message(context, "Error ${response.statusMessage}", false);
+      } catch (e) {
+        Send.message(context, "Error $e", false);
+        print("Error during API call: $e");
+      }
+    }
+  }
+
   void initState(){
+    vsdiscount();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
@@ -112,7 +143,11 @@ class _Final_PaymentState extends State<Final_Payment> {
             color: Colors.white
         ),
         centerTitle: true,
-        title: Text("Booking Confirmation",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+        title: InkWell(
+            onTap: (){
+              vsdiscount();
+            },
+            child: Text("Booking Confirmation",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
       ),
       body: SingleChildScrollView(
         child: Column(

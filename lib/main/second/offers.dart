@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dod/api.dart';
 import 'package:flutter/material.dart';
 
+import '../../global.dart' show Send;
 import '../../login/bloc/login/view.dart';
 import '../../model/booking_response.dart';
 import '../../model/coupon.dart';
@@ -65,22 +66,87 @@ class _OffersState extends State<Offers> {
         itemCount: coupons.length,
         itemBuilder: (context, index) {
           final coupon = coupons[index];
-          return Card(
-            margin: EdgeInsets.all(8),
-            child: ListTile(
-              title: Text(coupon.name),
-              subtitle: Text(
-                "${coupon.code} • ${coupon.discountType == 'percentage' ? '${coupon.amount}%' : '₹${coupon.amount}'} off",
-              ),
-              trailing: Text(
-                "${coupon.startDate} → ${coupon.endDate}",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ),
-          );
+          return OfferCard(coupon: coupon);
         },
       ),
 
     );
   }
 }
+
+class OfferCard extends StatelessWidget {
+  CouponModel coupon ;
+   OfferCard({super.key,required this.coupon});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final Dio dio = Dio(
+          BaseOptions(validateStatus: (status) => status != null && status < 500),
+        );
+        try {
+          final response = await dio.post(
+            Api.apiurl + "user-apply-coupon",
+            data: {
+              "code":coupon.code,
+              "order_amount":100,
+            },
+            options: Options(
+              headers: {"Authorization": "Bearer ${UserModel.token}"},
+            ),
+          );
+
+          print("Status: ${response.statusCode}");
+          print("Response: ${response.data}");
+
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            Navigator.pop(context,coupon.code);
+            return;
+          }
+
+          Send.message(context, "Error ${response.statusMessage}", false);
+        } catch (e) {
+          Send.message(context, "Error $e", false);
+          print("Error during API call: $e");
+        }
+      },
+      child: Card(
+        color: Colors.white,
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.local_offer,color: Colors.red,size: 35,),
+              title: Text(coupon.name,style: TextStyle(fontWeight: FontWeight.w900),),
+              subtitle: Text(coupon.type+" Discount"),
+              trailing: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.red,
+                    width: 2
+                  )
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 4),
+                  child: Text("APPLY",style: TextStyle(color: Colors.red,fontWeight: FontWeight.w800),),
+                ),
+              ),
+            ),
+            r("Coupon Code", coupon.code),
+            SizedBox(height: 10,)
+          ],
+        ),
+      ),
+    );
+  }
+  Widget r(String str,String str2){
+    return Row(
+      children: [
+        SizedBox(width: 15,),
+        Text("$str : "),
+        Text("$str2",style: TextStyle(fontWeight: FontWeight.w500),)
+      ],
+    );
+  }
+}
+

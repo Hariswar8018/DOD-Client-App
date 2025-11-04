@@ -1,3 +1,4 @@
+import 'package:dod/main/second/offers.dart';
 import 'package:dod/second/message/final_payment.dart';
 import 'package:dod/second/message/success.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -432,42 +433,40 @@ class _Book_OneWayState extends State<Book_OneWay> {
       persistentFooterButtons: [
         Column(
           children: [
-             Padding(
-                padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
-                child: Row(
-                  children: [
-                    InkWell(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                              Say_No(str: "Offers & Coupons",
-                                  description: "We don't have any Coupons or Offers")));
-                        },
-                        child: Icon(Icons.discount,color: Colors.green,)),
-                    InkWell(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                              Say_No(str: "Offers & Coupons",
-                                  description: "We don't have any Coupons or Offers")));
-                        },
-                        child: Text("  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),)),
-                    Spacer(),
-                    Container(width: 1,height: 24,color: Colors.grey,),
-                    SizedBox(width: 9),
-                    Icon(Icons.account_balance,color: Colors.green,),
-                    Text("  Cash",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
-                    SizedBox(width: 18,),
-                    Spacer(),
-                  ],
+             InkWell(
+               onTap: () async {
+                 final op = await Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
+                 setState(() {
+                   couponid=op.toString();
+                   print(couponid);
+                 });
+               },
+               child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
+                  child: Row(
+                    children: [
+                      Icon(Icons.discount,color: Colors.green,),
+                      Text(couponid!=""?"  1 Offer Selected":"  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      Spacer(),
+                      Container(width: 1,height: 24,color: Colors.grey,),
+                      SizedBox(width: 9),
+                      Icon(Icons.account_balance,color: Colors.green,),
+                      Text("  Cash / Online",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      SizedBox(width: 12,),
+                      Spacer(),
+                    ],
+                  ),
                 ),
-              ),
+             ),
             InkWell(
               onTap: (){
+                double disc = 0.0;
                 Navigator.push(context, MaterialPageRoute(builder: (_)=>Final_Payment(
                     couponid: couponid, triptype: widget.type=="One Way"?"oneway":(widget.type=="Round Trip"?"roundup":"outstation"), bookingtype: "upcoming",
                     droplon: widget.lon2, droplat:widget.lat2, pickup: widget.str,
                     pickup_longitude: widget.lon1, pickup_latitude: widget.lat1,
                     date: given, drop: widget.str2, waitinghours: i.toDouble(), price: price.toDouble(),
-                  name: widget.type, transmission: trasmission, cartype: type,
+                  name: widget.type, transmission: trasmission, cartype: type, discount: couponid,
                 )));
               },
               child: Container(

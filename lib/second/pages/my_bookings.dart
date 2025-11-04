@@ -53,6 +53,7 @@ class _MyBookingsState extends State<MyBookings> {
         orders=[];
         for (var order in bookingsResponse.bookings) {
           print("📦 Booking ID: ${order.id}, Status: ${order.status}, User: ${order.user.name}");
+          print("oooooooooooooooooooooooooooooooooooooooooooooooooooo");
           orders.add(order);
         }
         setState(() {
@@ -234,12 +235,8 @@ class _OrderCardsState extends State<OrderCards> {
     double w = MediaQuery.of(context).size.width;
     return Center(
       child: InkWell(
-        onLongPress:(){
-          oop(BookingStatus.over, context);
-        },
         onTap: () async {
           if(widget.myorder.status=="payment-over-due"){
-
             var options = {
               'key': 'rzp_live_ROEbzdCOAGyyGu',
               'amount': (widget.myorder.amount*100),
@@ -292,7 +289,7 @@ class _OrderCardsState extends State<OrderCards> {
           }
           Navigator.push(context, MaterialPageRoute(builder: (_)=>MyBookingFull(order: widget.myorder)));
         },
-        child: Card(
+        child: widget.myorder.bookingType=="monthly"||widget.myorder.bookingType=="weekly"? daily_driver(w):Card(
           color: Colors.white,
           child: Container(
             width: w-20,
@@ -396,6 +393,116 @@ class _OrderCardsState extends State<OrderCards> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget daily_driver(double w){
+    print("ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
+    print(widget.myorder.toString());
+    return Card(
+      color: Colors.white,
+      child: Container(
+        width: w-20,
+        height: 220,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0,top: 15,right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Daily Driver ID : #DOD000000${widget.myorder.id} ",style: TextStyle(fontWeight: FontWeight.w800),),
+                  isAfter()?Column(
+                    children: [
+                      Text("Still Finding Drivers",style: TextStyle(fontSize: 9,color: Colors.grey),),
+                      SizedBox(height: 2,),
+                      Container(
+                        width: w/5+10,
+                        height: 3,
+                        child: LinearProgressIndicator(),
+                      )
+                    ],
+                  ):InkWell(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (_)=>Myorder(order: widget.myorder,)));
+
+                      },
+                      child: Icon(Icons.more_vert_outlined)),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                SizedBox(width: 15,),
+                Container(
+                  width: 20,
+                  height: 90,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.green,
+                        radius: 6,
+                      ),
+                      SizedBox(width: 2,),
+                      Container(
+                        width: 2,
+                        height: 25,
+                        decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(5)
+                        ),
+                      ),
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        radius: 10,
+                        child:Icon(Icons.location_on_sharp,color: Colors.red,size: 18,),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 15,),
+                Container(
+                  width: w-15-20-20-20,
+                  height: 90,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${widget.myorder.pickupLocation} ",maxLines:1,style: TextStyle(fontWeight: FontWeight.w800),),
+                      SizedBox(height: 8,),
+                      Container(
+                        width: w-15-20-20-20-15,
+                        height: 2,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(15)
+                        ),
+                      ),
+                      SizedBox(height: 8,),
+                      Text("${widget.myorder.dropLocation} ",maxLines:1,style: TextStyle(fontWeight: FontWeight.w800),),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            open()?SizedBox():Padding(
+              padding: const EdgeInsets.only(left: 15.0,top: 5),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month,color: Colors.black,),
+                  Text(" ${widget.myorder.status!="over"?"Sheduled for":"Trip done at"} : ${formatDateTime(widget.myorder.bookingTime.toString())}"
+                    ,style: TextStyle(fontWeight: FontWeight.w500),),
+                ],
+              ),
+            ),
+            sh(w),
+          ],
         ),
       ),
     );
