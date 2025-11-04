@@ -31,11 +31,11 @@ class _NavigationState extends State<Navigation> {
     Home(),
     Profile(),
   };
-  
+
   void initState(){
     v();
   }
-  
+
   v() async {
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
@@ -93,18 +93,15 @@ class _NavigationState extends State<Navigation> {
               position.latitude,
               position.longitude,
             );
-
             Placemark place = placemarks.first;
             String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
             setState(() {
               Global.mylocation=mynew;
               Global.mylat=position.latitude;
               Global.mylong=position.longitude;
-            });
-            print("Token => ${state.userData.name}");
-            setState(() {
               UserModel.user=state.userData;
             });
+            print("Token => ${state.userData.name}");
           }
         }, builder: ( context,  state) {
           if(state is AuthLoading){

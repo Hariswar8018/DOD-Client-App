@@ -11,12 +11,11 @@ class Global{
   static Color black = Color(0xff25252D);
 
 
-  static late String mylocation ;
+  static late String mylocation  ="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur";
 
   String s ="Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002";
 
-
-  static late double mylat,mylong;
+  static late double? mylat,mylong;
 
   static List<String> places = [
     "Ahmedabad Junction Railway Station, Kalupur Railway Station Road, Sakar Bazzar, Kalupur, Ahmedabad, Gujarat 380002" ,  // main railway station :contentReference[oaicite:0]{index=0}

@@ -1,6 +1,12 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dio/dio.dart';
 import 'package:dod/api.dart';
 import 'package:dod/global.dart';
+import 'package:dod/main/googlemap.dart';
+import 'package:dod/main/second/offers.dart';
+import 'package:dod/main/second/refer.dart';
 import 'package:dod/return_functions/location.dart';
 import 'package:dod/second/one_way.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +19,11 @@ import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../login/bloc/login/view.dart';
+import '../model/booking_response.dart';
+import '../model/ordermodel.dart' show OrderModel;
 import '../second/book_daily.dart' show Daily;
+import '../second/pages/my_bookings.dart';
 
 class Home extends StatefulWidget {
    Home({super.key});
@@ -25,36 +35,65 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final mapsWidgetController = GlobalKey<GoogleMapsWidgetState>();
 
-
-  // initialized the function
-
   void initState() {
     super.initState();
-    getvalue();
-    v();
+    all();
+  }
+
+
+
+  all() async {
+    await getvalue();
+    await getCurrentLocation();
+    await gets();
     setState(() {
 
     });
   }
-  v() async {
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
 
-    print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
+  Future<LatLng> getCurrentLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception("Location permission denied");
+        }
+      }
 
-    Placemark place = placemarks.first;
-    String mynew = "${place.subLocality}, ${place.street}, ${place.subAdministrativeArea}, ${place.locality}, ${place.postalCode}, ${place.administrativeArea},${place.country}";
-    setState(() {
-      Global.mylocation=mynew;
-      Global.mylat=position.latitude;
-      Global.mylong=position.longitude;
-    });
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception("Location permission permanently denied");
+      }
 
+      // Step 2: Get Current Position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      print("Latitude: ${position.latitude}, Longitude: ${position.longitude}");
+
+      // Step 3: Optionally get address (not required, but you can keep if needed)
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      Placemark place = placemarks.first;
+
+      String mynew =
+          "${place.subLocality ?? ''}, ${place.street ?? ''}, ${place.subAdministrativeArea ?? ''}, "
+          "${place.locality ?? ''}, ${place.postalCode ?? ''}, ${place.administrativeArea ?? ''}, ${place.country ?? ''}";
+
+      print("Current Address: $mynew");
+
+      Global.mylocation = mynew;
+      Global.mylat = position.latitude;
+      Global.mylong = position.longitude;
+      return LatLng(position.latitude, position.longitude);
+    } catch (e) {
+      print("Error getting location: $e");
+      throw Exception("Failed to fetch location");
+    }
   }
 
 
@@ -63,10 +102,54 @@ class _HomeState extends State<Home> {
   Future<void> getvalue() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     home=pref.getString("History")??"NA";
-    setState(() {
-
-    });
   }
+  Stream<String> alternatingTextStream({String text1="Your Next Driver", String text2="41 MINS AWAY"}) async* {
+    bool showFirst = true;
+    while (true) {
+      yield showFirst ? text1 : text2;
+      showFirst = !showFirst;
+      await Future.delayed(const Duration(seconds: 4));
+    }
+  }
+
+  Future<void> gets() async {
+    final Dio dio = Dio(
+      BaseOptions(
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+
+    try {
+      final response = await dio.get(
+        Api.apiurl + "user-bookings",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer ${UserModel.token}",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print(response.data);
+        print("----------------------------->");
+        print(UserModel.token);
+        final bookingsResponse = BookingsResponse.fromJson(response.data);
+        print("✅ Total bookings: ${bookingsResponse.bookings.length}");
+        orders=[];
+        for (var order in bookingsResponse.bookings) {
+          print("📦 Booking ID: ${order.id}, Status: ${order.status}, User: ${order.user.name}");
+          orders.add(order);
+        }
+      } else {
+        print("❌ Error: ${response.statusMessage}");
+      }
+    } catch (e) {
+      print("Error during API call: $e");
+    }
+  }
+
+  List<OrderModel> orders = [];
+
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -96,11 +179,19 @@ class _HomeState extends State<Home> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 InkWell(
-                                    onTap: (){
-                                    },
                                     child: Text("Hire Drivers",style: TextStyle(fontSize: 19,fontWeight: FontWeight.w800,color: Colors.white),)),
                                 Spacer(),
-                                Text("41 MINS AWAY",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w800,color: Colors.white),)
+                                StreamBuilder<String>(
+                                  stream: alternatingTextStream(),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) return const SizedBox();
+                                    return Text(
+                                      snapshot.data!,
+                                      style:  TextStyle(fontSize: 13, color: snapshot.data=="Your Next Driver"? Colors.white:Colors.blue,fontWeight: FontWeight.w800,),
+                                      textAlign: TextAlign.center,
+                                    );
+                                  },
+                                )
                               ],
                             ),
                           ),
@@ -114,24 +205,41 @@ class _HomeState extends State<Home> {
                               Container(
                                 width: w,
                                 height: 220,
-                                child:  GoogleMapsWidget(
-                                  apiKey: Api.googlemap,
-                                  key: mapsWidgetController,
-                                  sourceLatLng: LatLng(
-                                    Global.mylat,
-                                    Global.mylong,
-                                  ),
-                                  destinationLatLng: LatLng(
-                                    Global.mylat,
-                                    Global.mylong,
-                                  ),
-                                  updatePolylinesOnDriverLocUpdate: true,
-                                  onPolylineUpdate: (_) {
-                                    print("Polyline updated");
+                                child: FutureBuilder<LatLng>(
+                                  future: getCurrentLocation(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Container(
+                                        color: Colors.grey.shade100,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Image.network(width: w/3,"https://logos-world.net/wp-content/uploads/2022/01/Google-Maps-Logo.png"),
+                                            Text("Loading Google Map.... Please Wait"),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    if (snapshot.hasError || !snapshot.hasData) {
+                                      return Container(
+                                        color: Colors.grey.shade100,
+                                        child: const Center(child: Text("Location not available")),
+                                      );
+                                    }
+                                    final LatLng location = snapshot.data!;
+                                    return GoogleMapsWidget(
+                                      apiKey: Api.googlemap,
+                                      key: mapsWidgetController,
+                                      sourceLatLng: location,
+                                      destinationLatLng: location,
+                                      updatePolylinesOnDriverLocUpdate: true,
+                                      onPolylineUpdate: (_) => print("Polyline updated"),
+                                      totalTimeCallback: (time) => print(time),
+                                      totalDistanceCallback: (distance) => print(distance),
+                                    );
                                   },
-                                  // mock stream
-                                  totalTimeCallback: (time) => print(time),
-                                  totalDistanceCallback: (distance) => print(distance),
                                 ),
                               ),
                               Padding(
@@ -201,8 +309,8 @@ class _HomeState extends State<Home> {
                                                 height: 30,
                                                 width: w-60,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  borderRadius: BorderRadius.circular(5)
+                                                    color: Colors.black,
+                                                    borderRadius: BorderRadius.circular(5)
                                                 ),
                                                 child: Center(child: Text("Reserve Now",style: TextStyle(fontSize: 13,fontWeight: FontWeight.w800,color: Colors.white),)),
                                               ),
@@ -230,7 +338,7 @@ class _HomeState extends State<Home> {
                                               InkWell(
                                                 onTap: (){
                                                   Navigator.push(context,MaterialPageRoute(builder: (_)=>One_Way(dateTime: given,i: i,)));
-                                                  },
+                                                },
                                                 child: Container(
                                                   width: w - 40,
                                                   height: 45,
@@ -287,7 +395,7 @@ class _HomeState extends State<Home> {
                                                   SizedBox(width: 10),
                                                   Text("My Location : ", style: TextStyle(color: Colors.green)),
                                                   Text(
-                                                    Global.mylocation.length > 27 ? Global.mylocation.substring(0, 27) + '...' : Global.mylocation,
+                                                    Global.mylocation!.length > 27 ? Global.mylocation!.substring(0, 27) + '...' : Global.mylocation!,
                                                     style: TextStyle(color: Colors.black),
                                                   ),
                                                 ],
@@ -312,7 +420,7 @@ class _HomeState extends State<Home> {
                               )
                             ],
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -354,7 +462,7 @@ class _HomeState extends State<Home> {
                                       }
                                     },
                                     child: Text(
-                                      Global.mylocation.length > 34 ? Global.mylocation.substring(0, 34) + '...' : Global.mylocation,
+                                      Global.mylocation!.length > 34 ? Global.mylocation!.substring(0, 34) + '...' : Global.mylocation!,
                                       style: TextStyle(color: Colors.black),
                                     ),
                                   ),
@@ -369,6 +477,52 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
+              orders.isEmpty?SizedBox():SizedBox(height: 10,),
+              orders.isEmpty?SizedBox():Container(
+                width: w,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              MyBookings()));
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("My Upcoming Bookings",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 19),),
+                            Text("See All >  ",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 14,color: Colors.blue),),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 13,),
+                      Container(
+                        width: w,
+                        height: 220,
+                        child: ListView.builder(
+                          itemCount: orders.length,scrollDirection: Axis.horizontal,
+                          itemBuilder: (BuildContext context, int index) {
+                            final OrderModel myorder = orders[index];
+                            return OrderCards(myorder: myorder,onUpdate: () async {
+                              await gets();
+                              setState(() {
+
+                              });
+                            },);
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 9,),
+
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 25,),
               Container(
                 width: w,
                 color: Colors.white,
@@ -382,9 +536,21 @@ class _HomeState extends State<Home> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          cont(w, Colors.blue.shade50, "https://cdn-icons-png.flaticon.com/512/289/289736.png", "Service"),
-                          cont(w, Colors.greenAccent.shade100, "https://static.vecteezy.com/system/resources/thumbnails/032/161/162/small_2x/3d-gold-coin-no-background-png.png", "Coins"),
-                          cont(w, Colors.orange.shade50, "https://cdn-icons-png.flaticon.com/512/1646/1646830.png", "Refer & Earn")
+                          InkWell(
+                              onTap:(){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
+                              },
+                              child: cont(w, Colors.greenAccent.shade100, "https://static.vecteezy.com/system/resources/thumbnails/032/161/162/small_2x/3d-gold-coin-no-background-png.png", "Offers & Coupons")),
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>Refer()));
+                              },
+                              child: cont(w, Colors.orange.shade50, "https://cdn-icons-png.flaticon.com/512/1646/1646830.png", "Refer & Earn")),
+                          InkWell(
+                              onTap: (){
+
+                              },
+                              child: cont(w, Colors.blue.shade50, "https://cdn-icons-png.flaticon.com/512/289/289736.png", "Join as Driver")),
                         ],
                       ),
                       SizedBox(height: 9,),
@@ -827,3 +993,6 @@ class _HomeState extends State<Home> {
 
   int i = 0;
 }
+
+
+

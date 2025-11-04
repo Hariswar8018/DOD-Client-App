@@ -47,8 +47,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
 
-
-
   void initState(){
     if(FirebaseAuth.instance.currentUser==null){
       Timer(Duration(seconds: 3),(){
@@ -76,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(4.0),
             child: Text("Trusted by",style: TextStyle(color: Colors.white,fontSize: 17),),
           ),
-          Text("70,000+ Car Owners",style: TextStyle(color: Colors.white,fontSize: 15,fontWeight: FontWeight.w800),),
+          Text("90,000+ Customers",style: TextStyle(color: Colors.white,fontSize: 15,fontWeight: FontWeight.w800),),
           SizedBox(height: 50,),
         ],
       ),

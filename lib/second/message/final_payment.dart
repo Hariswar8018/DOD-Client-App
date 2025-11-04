@@ -267,8 +267,6 @@ class _Final_PaymentState extends State<Final_Payment> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       header("Payment Method"),
-                      listtile(w, 0, "Pay by Razorpay", "Pay by UPI, Netbanking, Wallet, and Pay Later"),
-                      listtile(w, 1, "Pay Advance", "Pay 20% Now and 80% after Drive is Completed"),
                       listtile(w, 2, "Pay by Cash", "Pay after the Drive is Completed")
                     ],
                   ),
@@ -378,12 +376,13 @@ class _Final_PaymentState extends State<Final_Payment> {
       backgroundColor: Colors.white,
     );
   }
+
   String formatDateTime(DateTime dateTime) {
     // Format: DD MonthName, HH:MM AM/PM
     final DateFormat formatter = DateFormat('dd MMMM, hh:mm a');
     return formatter.format(dateTime);
   }
-  int i = 0 ;
+  int i = 2 ;
   Widget listtile(double w,int j, String str, String str2)=>InkWell(
     onTap: (){
       setState(() {
@@ -422,6 +421,7 @@ class _Final_PaymentState extends State<Final_Payment> {
       ),
     ),
   );
+
   Widget header(String str)=>Padding(
     padding: const EdgeInsets.only(bottom: 7.0),
     child: Text(str,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 20),),
@@ -452,8 +452,6 @@ class _Final_PaymentState extends State<Final_Payment> {
     ),
   );
   void orderdone(String paymentid) async {
-
-    payments("HIHDSW632787", paymentid, "UIDSHDIDI62627", "Success");
     if (widget.pickup_latitude == null ||
         widget.pickup_longitude == null ||
         widget.droplat == null ||
@@ -479,7 +477,7 @@ class _Final_PaymentState extends State<Final_Payment> {
 
     final data = {
       "coupon_id": null,
-      "booking_type": "oneway",
+      "booking_type": widget.triptype=="One Way"?"oneway":widget.triptype=="Round Trip"?"roundtrip":"outstation",
       "trip_type": "upcoming",
       "waiting_hours": widget.waitinghours.toInt(),
       "pickup_location": widget.pickup,
@@ -545,7 +543,9 @@ class _Final_PaymentState extends State<Final_Payment> {
       print("Status: ${response.statusCode}");
       print("Response: ${response.data}");
       print(response.statusMessage);
+      orderdone(paymentid);
     } catch (e) {
+      orderdone(paymentid);
       print("Error during API call: $e");
     }
   }

@@ -1,9 +1,14 @@
 import 'package:dod/global.dart';
 import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main/profile/user_screen.dart';
+import 'package:dod/main/second/gethelp.dart';
+import 'package:dod/main/second/join_as_driver.dart';
+import 'package:dod/main/second/offers.dart';
+import 'package:dod/main/second/refer.dart';
 import 'package:dod/other/say_no.dart';
 import 'package:dod/second/link.dart';
 import 'package:dod/second/pages/my_bookings.dart';
+import 'package:dod/second/pages/mypayments.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -98,8 +103,7 @@ class Profile extends StatelessWidget {
                     InkWell(
                         onTap: (){
                           Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                              Say_No(str: "My Transactions",
-                                  description: "You haven't done any Transaction ")));
+                              MyPayments()));
                         },
                         child: a(Icon(Icons.account_balance,color: Colors.green,),"Payments","View and Manage Payments")),
                   ],
@@ -117,12 +121,14 @@ class Profile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text("Rewards & Settings",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
-                    "kk"=="kk"?SizedBox(): a(Icon(Icons.send,color: Colors.green,),"Refer & Earn","Invite more than 100 Credit"),
                     InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                              Say_No(str: "Offers & Coupons",
-                                  description: "We don't have any Coupons or Offers")));
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Refer()));
+                        },
+                        child: a(Icon(Icons.send,color: Colors.green,),"Refer & Earn","Invite more than 100 Credit")),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
                         },
                         child: a(Icon(Icons.discount,color: Colors.green,),"Offers","View all Coupons")),
                     "kk"=="kk"?SizedBox():a(Icon(Icons.circle_sharp,color: Colors.green,),"DOD Coins","Earn Rewards for your Drivings"),
@@ -143,7 +149,7 @@ class Profile extends StatelessWidget {
                     Text("Support",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
                     InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Link(link: "", str: "Support")));
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>GetHelp()));
                         },
                         child: a(Icon(Icons.support,color: Colors.green,),"Get Help","Get instant and view FAQs")),
                     InkWell(
@@ -168,7 +174,7 @@ class Profile extends StatelessWidget {
                     Text("For Partners",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
                     InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Link(link: "", str: "Join as DOD Driver")));
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Join()));
                         },
                         child: a(Icon(Icons.handshake,color: Colors.green,),"Join as DOD Driver","Earn with DOD with 0 Investment")),
                   ],

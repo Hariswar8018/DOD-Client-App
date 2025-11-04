@@ -1,7 +1,19 @@
-import 'package:dod/return_functions/position.dart';
-import 'package:flutter/material.dart';
 
-import '../global.dart';
+
+
+
+
+
+import 'package:dod/global.dart';
+import 'package:dod/second/book.dart';
+import 'package:dod/second/book_daily.dart';
+import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart' as df;
+import 'package:map_location_picker/map_location_picker.dart' as dk;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../return_functions/position.dart' ;
+
+
 
 class Location extends StatefulWidget {
    Location({super.key});
@@ -21,7 +33,7 @@ class _LocationState extends State<Location> {
 
   void _onSearchChanged() {
     String query = controller.text.toLowerCase();
-    if (query.length >= 4) {
+    if (query.length >= 1) {
       setState(() {
         filteredPlaces = Global.places
             .where((place) => place.toLowerCase().contains(query))
@@ -90,7 +102,16 @@ class _LocationState extends State<Location> {
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(filteredPlaces[index]),
-                  onTap: () {
+                  onTap: () async {
+                    double lat = await latitute(filteredPlaces[index]);
+                    double lon = await longitude(filteredPlaces[index]);
+                    Global.mylocation=filteredPlaces[index];
+                    setState(() {
+                      Global.mylocation=filteredPlaces[index];
+                      Global.mylat = lat;
+                      Global.mylong = lon;
+                    });
+                    Global.mylocation=filteredPlaces[index];
                     Navigator.pop(context,filteredPlaces[index]);
                   },
                 );
@@ -101,8 +122,21 @@ class _LocationState extends State<Location> {
       ),
       persistentFooterButtons: [
         InkWell(
-          onTap: (){
-            Navigator.push(context,MaterialPageRoute(builder: (_)=>Position()));
+          onTap: () async {
+            try {
+              dk.GeocodingResult? result = await Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => Position()));
+              if (result == null) {
+                return;
+              }
+              setState(() async {
+                Global.mylocation=result.formattedAddress!;
+                Global.mylat = await latitute(result.formattedAddress.toString());
+              });
+              Navigator.pop(context,result.formattedAddress!);
+            }catch(e){
+              Send.message(context, "$e", false);
+            }
           },
           child: Container(
             width: w-10,
@@ -125,7 +159,14 @@ class _LocationState extends State<Location> {
     );
   }
 
-
+  Future<double> latitute(String str) async {
+    List<df.Location> locations = await df.locationFromAddress(str);
+    return locations.first.latitude;
+  }
+  Future<double> longitude(String str) async {
+    List<df.Location> locations = await df.locationFromAddress(str);
+    return locations.first.longitude;
+  }
 
 
 

@@ -32,15 +32,22 @@ class _PositionState extends State<Position> {
       body: MapLocationPicker(
         key: Key(Api.googlemap),
         searchConfig: SearchConfig(
-          apiKey: "",
-
+          apiKey: Api.googlemap,
         ),
         geoCodingConfig: GeoCodingConfig(apiKey: Api.googlemap,),
         config: MapLocationPickerConfig(
-          initialPosition: LatLng(Global.mylat, Global.mylong),
+          initialPosition: LatLng(Global.mylat!, Global.mylong!),onAddressSelected: (GeocodingResult? result) {
+          print("---------------------");
+          if (result != null) {
+            print("$result");
+            double lat = result.geometry!.location.lat;
+            double lng = result.geometry!.location.lng;
+            String address = result.formattedAddress ?? "Address not found";
+            Navigator.pop(context,result);
+          }
+        },
         ),
       ),
-      persistentFooterButtons: [],
     );
   }
 }

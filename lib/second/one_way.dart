@@ -1,10 +1,14 @@
+
+
+
 import 'package:dod/global.dart';
 import 'package:dod/second/book.dart';
 import 'package:dod/second/book_daily.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:map_location_picker/map_location_picker.dart' as dk;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../return_functions/position.dart';
+import '../return_functions/position.dart' ;
 
 class One_Way extends StatefulWidget {
   const One_Way({super.key,required this.dateTime,required this.i});
@@ -15,6 +19,7 @@ class One_Way extends StatefulWidget {
 }
 
 class _One_WayState extends State<One_Way> {
+
   bool on=false;
   @override
   Widget build(BuildContext context) {
@@ -147,7 +152,8 @@ class _One_WayState extends State<One_Way> {
                               lat1: lat1,
                               lon1: lom1,
                               lat2: lat2,
-                              lon2: lon2, dateTime:widget.dateTime, type: widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),
+                              lon2: lon2,
+                              dateTime:widget.dateTime, type: widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),
                             )));                      }
                       setState(() {
                         on=false;
@@ -166,14 +172,45 @@ class _One_WayState extends State<One_Way> {
       ),
       persistentFooterButtons: [
         InkWell(
-          onTap: (){
-            Navigator.push(context,MaterialPageRoute(builder: (_)=>Position()));
+          onTap: () async {
+            try {
+              dk.GeocodingResult? result  = await Navigator.push(context,MaterialPageRoute(builder: (_)=>Position()));
+              if( result == null ){
+                return ;
+              }
+              setState(() {
+                on=true;
+              });
+              double lat1 = await latitute(str);
+              double lom1 = await longitude(str);
+              double lat2 = result.geometry!.location.lat;
+              double lon2 = result.geometry!.location.lng;
+              if(widget.i==3){
+
+              }else{
+                Navigator.push(context, MaterialPageRoute(builder: (_) =>
+                    Book_OneWay(str: str,
+                      str2: controller.text,
+                      lat1: lat1,
+                      lon1: lom1,
+                      lat2: lat2,
+                      lon2: lon2,
+                      dateTime:widget.dateTime, type: widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),
+                    )));                      }
+              setState(() {
+                on=false;
+              });
+            }catch(e){
+              setState(() {
+                on=false;
+              });
+            }
           },
           child: Container(
             width: w-10,
             height: 50,
             decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.black,
                 borderRadius: BorderRadius.circular(8)
             ),
             child: Row(
@@ -181,7 +218,7 @@ class _One_WayState extends State<One_Way> {
               children: [
                 Icon(Icons.add_location,color: Colors.green,),
                 SizedBox(width: 7,),
-                Text("Locate on the Map",style: TextStyle(fontWeight: FontWeight.w800),)
+                Text("Locate on the Map",style: TextStyle(fontWeight: FontWeight.w800,color: Colors.white),)
               ],
             ),
           ),
@@ -204,7 +241,7 @@ class _One_WayState extends State<One_Way> {
     return locations.first.longitude;
   }
 
-  String str = Global.mylocation;
+  String str = Global.mylocation!;
 
   List<String> filteredPlaces = [];
 
@@ -212,6 +249,7 @@ class _One_WayState extends State<One_Way> {
   void initState() {
     super.initState();
     controller.addListener(_onSearchChanged);
+    str= Global.mylocation;
   }
 
   void _onSearchChanged() {
