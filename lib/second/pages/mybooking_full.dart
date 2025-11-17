@@ -1,10 +1,11 @@
 import 'package:dod/model/ordermodel.dart';
+import 'package:dod/second/pages/order.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class MyBookingFull extends StatelessWidget {
-  OrderModel order;
-   MyBookingFull({super.key,required this.order});
+  OrderModel order;bool back ;
+   MyBookingFull({super.key,required this.order, this.back = false});
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +19,15 @@ class MyBookingFull extends StatelessWidget {
             color: Colors.white
         ),
         title: Text("Booking ID #${order.id}",style: TextStyle(color: Colors.white),),
+        actions: [
+          IconButton(onPressed: (){
+            if(back){
+              Navigator.pop(context);
+            }else{
+              Navigator.push(context, MaterialPageRoute(builder: (_)=>Myorder(order: order)));
+            }
+          }, icon: Icon(Icons.menu_sharp))
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -44,34 +54,6 @@ class MyBookingFull extends StatelessWidget {
                       ro("DOD Secured Trip","No"),
                       ro("Hours to be used","${order.waitingHours} hr"),
                     ],
-                  ),
-                ),
-              ),
-            ),
-            Center(
-              child: InkWell(
-                onTap: () async {
-
-                },
-                child: Container(
-                  width: w-20,
-                  margin: EdgeInsets.only(top: 15),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                          color: Colors.grey.shade400
-                      )
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        header("Instructions ( Optional )"),
-                        desc("No Instruction given"),
-                        SizedBox(height: 5,),
-                      ],
-                    ),
                   ),
                 ),
               ),
@@ -134,7 +116,6 @@ class MyBookingFull extends StatelessWidget {
                 ),
               ),
             ),
-
             Center(
               child: Container(
                 width: w-20,

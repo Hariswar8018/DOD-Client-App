@@ -19,7 +19,6 @@ import '../login/bloc/login/view.dart';
 
 class Daily_Driver extends StatefulWidget {
   final String pickup, drop;
-  const
   Daily_Driver({super.key,required this.pickup, required this.drop});
 
   @override
@@ -501,7 +500,6 @@ class _Daily_DriverState extends State<Daily_Driver> {
     );
   }
   Future<void> start() async {
-
 
     on(true);
     final Dio dio = Dio(

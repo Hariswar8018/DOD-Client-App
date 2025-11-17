@@ -1,14 +1,40 @@
+import 'package:dio/dio.dart';
 import 'package:dod/model/ordermodel.dart';
+import 'package:dod/second/pages/about_driver.dart';
 import 'package:dod/second/pages/track.dart';
 import 'package:flutter/material.dart';
 
+import '../../api.dart';
+import '../../login/bloc/login/view.dart';
 import '../../main/second/gethelp.dart' show GetHelp;
 import 'mybooking_full.dart';
 
 class Myorder extends StatelessWidget {
   OrderModel order;
    Myorder({super.key,required this.order});
-
+  Future<void> as() async {
+    final Dio dio = Dio(
+      BaseOptions(
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+    try {
+      print(UserModel.token);
+      final response = await dio.put(
+        Api.apiurl + "user-booking-payment-status/",
+        options: Options(
+          headers: {
+            "Authorization": "Bearer ${UserModel.token}",
+          },
+        ),
+      );
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.data}");
+      print(response.statusMessage);
+    } catch (e) {
+      print("Error during API call: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,21 +49,26 @@ class Myorder extends StatelessWidget {
       ),
       body: Column(
         children: [
+          order.driver==null?SizedBox():InkWell(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyDriver(driver: order.driver!, order: order,)));
+              },
+              child: lis(Icon(Icons.drive_eta,color: Colors.black,), "My Driver", "Get in touch with your Driver")),
           InkWell(
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyBookingFull(order: order)));
+                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyBookingFull(order: order,back: true,)));
               },
-              child: lis(Icon(Icons.indeterminate_check_box), "My Order", "Info about your Product")),
+              child: lis(Icon(Icons.indeterminate_check_box,color: Colors.orange,), "My Order", "Info about your Product")),
           InkWell(
               onTap: (){
-                Navigator.push(context,MaterialPageRoute(builder: (_)=>Track()));
+                Navigator.push(context,MaterialPageRoute(builder: (_)=>Track(order:order,)));
               },
-              child: lis(Icon(Icons.my_location_outlined), "Track Driver", "Track Driver of their Location")),
+              child: lis(Icon(Icons.my_location_outlined,color: Colors.brown,), "Track Driver", "Track Driver of their Location")),
           InkWell(
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (_)=>GetHelp()));
               },
-              child: lis(Icon(Icons.support_agent), "Support Team", "Raise Ticket or Reach Customer Care")),
+              child: lis(Icon(Icons.support_agent,color: Colors.blue,), "Support Team", "Raise Ticket or Reach Customer Care")),
           InkWell(
               onTap: (){
                 showDialog(

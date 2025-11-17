@@ -1,4 +1,5 @@
 import 'package:dod/global.dart';
+import 'package:dod/global/contacts.dart';
 import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main/profile/user_screen.dart';
 import 'package:dod/main/second/gethelp.dart';
@@ -154,7 +155,7 @@ class Profile extends StatelessWidget {
                         child: a(Icon(Icons.support,color: Colors.green,),"Get Help","Get instant and view FAQs")),
                     InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Link(link: "", str: "About Us")));
+                          Contacts.launchweb();
                         },
                         child: a(Icon(Icons.info,color: Colors.green,),"About Us","Known About us")),
                   ],

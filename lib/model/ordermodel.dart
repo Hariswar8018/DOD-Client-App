@@ -3,6 +3,8 @@
 
 
 
+import 'dart:convert';
+
 class OrderModel {
   final int id;
   final int userId;
@@ -28,7 +30,8 @@ class OrderModel {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final User user;
-
+  final User? driver;
+  final RecurringBooking? recurringBooking;
   OrderModel({
     required this.id,
     required this.userId,
@@ -54,6 +57,8 @@ class OrderModel {
     required this.createdAt,
     this.updatedAt,
     required this.user,
+    this.driver,
+    this.recurringBooking,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +87,12 @@ class OrderModel {
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] ?? ''),
       user: User.fromJson(json['user'] ?? {}),
+      driver: json['driver'] == null
+          ? null
+          : User.fromJson(json['driver']),
+      recurringBooking: json['recurring_booking'] == null
+          ? null
+          : RecurringBooking.fromJson(json['recurring_booking']),
     );
   }
 
@@ -97,23 +108,151 @@ class OrderModel {
 
 class User {
   final int id;
+  final String firebaseId;
+  final String provider;
+  final String referralNumber;
   final String name;
+  final String? username;
+  final String role;
   final String email;
   final String mobile;
+  final int? coins;
+  final String? emailVerifiedAt;
+  final String? fcmToken;
+  final String platformType;
+  final String status;
+  final String createdAt;
+  final String updatedAt;
+  final double? latitude;
+  final double? longitude;
+  final String? joined;
+  final String? lastOnline;
+  final String online;
 
   User({
     required this.id,
+    required this.firebaseId,
+    required this.provider,
+    required this.referralNumber,
     required this.name,
+    required this.username,
+    required this.role,
     required this.email,
     required this.mobile,
+    required this.coins,
+    required this.emailVerifiedAt,
+    required this.fcmToken,
+    required this.platformType,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.latitude,
+    required this.longitude,
+    required this.joined,
+    required this.lastOnline,
+    required this.online,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: OrderModel._parseInt(json['id']),
+      firebaseId: json['firebase_id'] ?? '',
+      provider: json['provider'] ?? '',
+      referralNumber: json['referral_number'] ?? '',
       name: json['name'] ?? '',
+      username: json['username'],
+      role: json['role'] ?? '',
       email: json['email'] ?? '',
       mobile: json['mobile']?.toString() ?? '',
+      coins: json['coins'],
+      emailVerifiedAt: json['email_verified_at'],
+      fcmToken: json['fcm_token'],
+      platformType: json['platform_type'] ?? '',
+      status: json['status'] ?? '',
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
+      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
+      joined: json['joined'],
+      lastOnline: json['last_online'],
+      online: json['online']?.toString() ?? "0",
+    );
+  }
+}
+class RecurringBooking {
+  final int id;
+  final int userId;
+  final String bookingType;
+  final List<RouteModel> routes;   // 👈 FIXED
+  final List<String> days;         // ["saturday", ...]
+  final String startDate;
+  final String endDate;
+  final String status;
+
+  RecurringBooking({
+    required this.id,
+    required this.userId,
+    required this.bookingType,
+    required this.routes,
+    required this.days,
+    required this.startDate,
+    required this.endDate,
+    required this.status,
+  });
+
+  factory RecurringBooking.fromJson(Map<String, dynamic> json) {
+    // decode routes (string → list)
+    final routesString = json['routes'] ?? '[]';
+    final routesJson = jsonDecode(routesString) as List;
+
+    // decode days
+    final daysString = json['days'] ?? '[]';
+    final daysJson = jsonDecode(daysString) as List;
+
+    return RecurringBooking(
+      id: OrderModel._parseInt(json['id']),
+      userId: OrderModel._parseInt(json['user_id']),
+      bookingType: json['booking_type'] ?? '',
+      routes: routesJson.map((e) => RouteModel.fromJson(e)).toList(),
+      days: daysJson.map((e) => e.toString()).toList(),
+      startDate: json['start_date'] ?? '',
+      endDate: json['end_date'] ?? '',
+      status: json['status'] ?? '',
+    );
+  }
+}
+
+class RouteModel {
+  final String pickupLocation;
+  final double pickupLatitude;
+  final double pickupLongitude;
+  final String dropLocation;
+  final double dropLatitude;
+  final double dropLongitude;
+  final String pickupTime;
+  final String dropTime;
+
+  RouteModel({
+    required this.pickupLocation,
+    required this.pickupLatitude,
+    required this.pickupLongitude,
+    required this.dropLocation,
+    required this.dropLatitude,
+    required this.dropLongitude,
+    required this.pickupTime,
+    required this.dropTime,
+  });
+
+  factory RouteModel.fromJson(Map<String, dynamic> json) {
+    return RouteModel(
+      pickupLocation: json['pickup_location'] ?? '',
+      pickupLatitude: (json['pickup_latitude'] ?? 0).toDouble(),
+      pickupLongitude: (json['pickup_longitude'] ?? 0).toDouble(),
+      dropLocation: json['drop_location'] ?? '',
+      dropLatitude: (json['drop_latitude'] ?? 0).toDouble(),
+      dropLongitude: (json['drop_longitude'] ?? 0).toDouble(),
+      pickupTime: json['pickup_time'] ?? '',
+      dropTime: json['drop_time'] ?? '',
     );
   }
 }

@@ -18,12 +18,14 @@ import 'package:location/location.dart' as lk;
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
+import '../global/contacts.dart';
 import '../login/bloc/login/view.dart';
 import '../model/booking_response.dart';
 import '../model/ordermodel.dart' show OrderModel;
 import '../second/book_daily.dart' show Daily;
 import '../second/pages/my_bookings.dart';
+import '../second/pages/mypayments.dart';
 
 class Home extends StatefulWidget {
    Home({super.key});
@@ -498,17 +500,18 @@ class _HomeState extends State<Home> {
                               onTap:(){
                                 Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
                               },
-                              child: cont(w, Colors.greenAccent.shade100, "https://static.vecteezy.com/system/resources/thumbnails/032/161/162/small_2x/3d-gold-coin-no-background-png.png", "Offers & Coupons")),
+                              child: cont(w, Colors.greenAccent.shade100, "assets/normal-forms-svgrepo-com.svg", "Offers & Coupons")),
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                                    MyBookings()));
+                              },
+                              child: cont(w, Colors.blue.shade50, "assets/online-order-shopping-ecommerce-svgrepo-com.svg", "My Bookings")),
                           InkWell(
                               onTap: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (_)=>Refer()));
                               },
-                              child: cont(w, Colors.orange.shade50, "https://cdn-icons-png.flaticon.com/512/1646/1646830.png", "Refer & Earn")),
-                          InkWell(
-                              onTap: (){
-
-                              },
-                              child: cont(w, Colors.blue.shade50, "https://cdn-icons-png.flaticon.com/512/289/289736.png", "Join as Driver")),
+                              child: cont(w, Colors.orange.shade50, "assets/share-svgrepo-com.svg", "Refer & Earn")),
                         ],
                       ),
                       SizedBox(height: 9,),
@@ -558,32 +561,41 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 20,),
-              Container(
-                width: w-30,
-                color: Colors.green.shade100,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                        backgroundColor: Global.grey,
-                        child: Icon(Icons.home_work_rounded)),
-                    title: Text("Saved Address",style: TextStyle(fontWeight: FontWeight.w700),),
-                    subtitle: Text("Improved your Booking Experience",style: TextStyle(fontSize: 11),),
+              InkWell(
+                onTap: Contacts.launchwhatsapp,
+                child: Container(
+                  width: w-30,
+                  color: Colors.green.shade100,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                          backgroundColor: Global.grey,
+                          child: Icon(Icons.two_wheeler)),
+                      title: Text("Learn Driving",style: TextStyle(fontWeight: FontWeight.w700),),
+                      subtitle: Text("We have a Service about Learning to Drive too",style: TextStyle(fontSize: 11),),
+                    ),
                   ),
                 ),
               ),
               SizedBox(height: 8,),
-              Container(
-                width: w-30,
-                color: Colors.red.shade100,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                        backgroundColor: Global.grey,
-                        child: Icon(Icons.car_crash)),
-                    title: Text("Add a Car",style: TextStyle(fontWeight: FontWeight.w700),),
-                    subtitle: Text("For better Experience & Reminder",style: TextStyle(fontSize: 11),),
+              InkWell(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                      MyPayments()));
+                },
+                child: Container(
+                  width: w-30,
+                  color: Colors.red.shade100,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                          backgroundColor: Global.grey,
+                          child: Icon(Icons.payments)),
+                      title: Text("See My Payments",style: TextStyle(fontWeight: FontWeight.w700),),
+                      subtitle: Text("Check all your Transactions done in App",style: TextStyle(fontSize: 11),),
+                    ),
                   ),
                 ),
               ),
@@ -903,14 +915,14 @@ class _HomeState extends State<Home> {
             color:color,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Center(
-              child: Image.network(str),
+            padding: const EdgeInsets.all(25.0),
+            child: SvgPicture.asset(
+              str,
             ),
-          ),
+          )
         ),
-        SizedBox(height: 2,),
-        Text(str2,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 12),)
+        SizedBox(height: 3,),
+        Text(str2,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 12),)
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:dod/global.dart';
+import 'package:dod/login/bloc/login/view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,7 +56,7 @@ class Refer extends StatelessWidget {
             ),SizedBox(height: 4,),
             InkWell(
               onTap: (){
-                Clipboard.setData(ClipboardData(text: "${FirebaseAuth.instance.currentUser!.uid}"));
+                Clipboard.setData(ClipboardData(text: "${UserModel.user.referralNumber }"));
                     Send.message(context, "Copied to Clipboard", true);
               },
               child: Container(
@@ -65,8 +66,8 @@ class Refer extends StatelessWidget {
                   color: Colors.orange.shade100,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Center(child: Text("${FirebaseAuth.instance.currentUser!.uid}  | 📋 ",style: TextStyle(
-                  fontWeight: FontWeight.w900,color: Colors.grey.shade800,fontSize: 14
+                child: Center(child: Text("${UserModel.user.referralNumber}",style: TextStyle(
+                  fontWeight: FontWeight.w900,color: Colors.grey.shade800,fontSize: 19
                 ),)),
               ),
             ),
@@ -78,7 +79,7 @@ class Refer extends StatelessWidget {
         InkWell(
           onTap: (){
             SharePlus.instance.share(
-                ShareParams(text: 'Now Schedule Drivers for your Trip with ease. Download our App now, and enjoy one way trips, outstation, and even daily drivers. \nDownload Now : https://play.google.com/store/apps/details?id=com.starwish.dod')
+                ShareParams(text: 'Now Schedule Drivers for your Trip with ease. Download our App now, and enjoy one way trips, outstation, and even daily drivers. \n\n\nDownload Now : https://play.google.com/store/apps/details?id=com.starwish.dod \n\nUse my referral code *${UserModel.user.referralNumber}* to get 10% off in your First Ride')
             );
           },
           child: Container(

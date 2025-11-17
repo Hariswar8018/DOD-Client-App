@@ -144,7 +144,7 @@ class _OrderCardsState extends State<OrderCards> {
               child: const Text("Driver Location"),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.push(context,MaterialPageRoute(builder: (_)=>Track()));
+                Navigator.push(context,MaterialPageRoute(builder: (_)=>Track(order: widget.myorder,)));
 
               },
             ),
@@ -209,7 +209,7 @@ class _OrderCardsState extends State<OrderCards> {
           "razorpay_order_id":orderid,
           "razorpay_payment_id":paymentid,
           "razorpay_signature":sign,
-          "status":"success",
+          "status":"Success",
         },
         options: Options(
           headers: {
@@ -253,7 +253,7 @@ class _OrderCardsState extends State<OrderCards> {
             return ;
           }
           if(widget.myorder.status=="arriving"){
-            Navigator.push(context,MaterialPageRoute(builder: (_)=>Track()));
+            Navigator.push(context,MaterialPageRoute(builder: (_)=>Track(order: widget.myorder,)));
             return ;
           }
           if(widget.myorder.status=="arrived"){
@@ -289,7 +289,14 @@ class _OrderCardsState extends State<OrderCards> {
           }
           Navigator.push(context, MaterialPageRoute(builder: (_)=>MyBookingFull(order: widget.myorder)));
         },
-        child: widget.myorder.bookingType=="monthly"||widget.myorder.bookingType=="weekly"? daily_driver(w):Card(
+        onLongPress: (){
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>Myorder(order: widget.myorder,)));
+        },
+        onDoubleTap: (){
+          Navigator.push(context, MaterialPageRoute(builder: (_)=>Myorder(order: widget.myorder,)));
+        },
+        child: widget.myorder.bookingType=="monthly"||widget.myorder.bookingType=="weekly"?
+        daily_driver(w):Card(
           color: Colors.white,
           child: Container(
             width: w-20,
@@ -591,7 +598,6 @@ class _OrderCardsState extends State<OrderCards> {
             Image.asset("assets/razoarpay.webp",height: 20,),
             Text("  Pay      "
               ,style: TextStyle(fontWeight: FontWeight.w600,color: Colors.black),),
-
           ],
         ),
       ),
@@ -791,19 +797,8 @@ class _OrderCardsState extends State<OrderCards> {
   }
 
   bool isAfter() {
-    try {
-      DateTime now = DateTime.now();
-      DateTime given = DateTime.parse(widget.myorder.bookingTime.toString());
-
-      Duration diff = given.difference(now);
-
-      // ✅ Return true only if 'given' is more than 20 minutes in the future
-      return diff.inMinutes > 20;
-    } catch (e) {
-      print("Error parsing date: $e");
-      return false;
+    return widget.myorder.driver==null;
     }
-  }
 
   String up(String str){
     return str.substring(0,1).toUpperCase()+str.substring(1);

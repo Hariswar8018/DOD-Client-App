@@ -125,14 +125,17 @@ class _LocationState extends State<Location> {
         InkWell(
           onTap: () async {
             try {
-              dk.GeocodingResult? result = await Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => Position()));
+              dk.GeocodingResult? result = await Navigator.push(context, MaterialPageRoute(builder: (_) => Position()));
               if (result == null) {
                 return;
               }
-              setState(() async {
+              double mylatt = await latitute(result.formattedAddress.toString());
+              double mylongg = await longitude(result.formattedAddress.toString());
+
+              setState(()  {
                 Global.mylocation=result.formattedAddress!;
-                Global.mylat = await latitute(result.formattedAddress.toString());
+                Global.mylat = mylatt;
+                Global.mylong = mylongg;
               });
               Navigator.pop(context,result.formattedAddress!);
             }catch(e){
