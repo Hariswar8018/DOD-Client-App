@@ -1,3 +1,4 @@
+import 'package:dod/global/price.dart';
 import 'package:dod/main/second/offers.dart';
 import 'package:dod/second/message/final_payment.dart';
 import 'package:dod/second/message/success.dart';
@@ -30,6 +31,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
 
   bool now = false;
   void initState(){
+    Price.gets();
     given=widget.dateTime;
   }
 
@@ -319,19 +321,45 @@ class _Book_OneWayState extends State<Book_OneWay> {
                           ),
                         ),
                         SizedBox(height: 20,),
-                        Text("   Estimated Usage",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                        Text("   Estimated Usage ( max 12 Hr ) ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                         SizedBox(height: 5),
-                        Row(
-                          children: [
-                            SizedBox(width: 10,),
-                            r(w, 1),r(w, 2),r(w, 3),
-                            r(w, 4),r(w, 5),r(w, 6),
-                          ],
+                        Container(
+                          width: w,
+                          height: 70,
+                          child: ListView.builder(
+                            itemCount: 12,
+                            padding: EdgeInsets.only(left: 10),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context, int index) {
+                              return r(w, index+1);
+                            },
+                          ),
                         ),
+                        SizedBox(height: 7,),
+                        i>=6?Center(
+                          child: Container(
+                            width: w-20,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade200,
+                              borderRadius: BorderRadius.circular(3)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 13),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.lightbulb,size: 20,),SizedBox(width: 6,),
+                                  Text(i>=8?"More than 8 hour will fetch Driver Food & Stay Allowance":"More than 6 hour will fetch Driver Food Allowance too"
+                                    ,style: TextStyle(fontSize: 11),),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ):SizedBox(),
                         SizedBox(height: 15,),
                         Row(
                           children: [
-                            Text("   Trip is DOD Secured ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                            Text("   Trip is DOD Secured ?",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                             Spacer(),
                             Switch(
                               value: isSwitched,
@@ -339,10 +367,9 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                 setState(() {
                                   isSwitched = value;
                                   if(isSwitched){
-
-                                      price=price+40;
+                                      price=price+100;
                                   }else{
-                                    price=price-40;
+                                    price=price-100;
                                   }
                                 });
                               },
@@ -388,7 +415,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   ),
                                   trailing: Text("₹$price",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23),),
                                   title: Text("DOD Classic",style: TextStyle(fontWeight: FontWeight.w900),),
-                                  subtitle: Text("Verified, Trained & Tested",style: TextStyle(color: Colors.grey.shade500),),
+                                  subtitle: Text("Verified, Trained & Tested Driver",style: TextStyle(color: Colors.grey.shade500,fontSize: 13),),
                                 ),
                               ),
                             ),
@@ -414,7 +441,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   ),
                                   trailing: Text("₹${price+100}",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23,color: Colors.grey),),
                                   title: Text("DOD Plus",style: TextStyle(fontWeight: FontWeight.w900,color: Colors.grey),),
-                                  subtitle: Text("Not Available at the moment",style: TextStyle(color: Colors.grey.shade400),),
+                                  subtitle: Text("Not Available at the moment",style: TextStyle(color: Colors.grey.shade400,fontSize: 13),),
                                 ),
                               ),
                             ),
@@ -486,8 +513,6 @@ class _Book_OneWayState extends State<Book_OneWay> {
   }
 
   String couponid="";
-
-
 
   void _showCustomDialog(BuildContext context) {
     showDialog(
@@ -808,18 +833,32 @@ class _Book_OneWayState extends State<Book_OneWay> {
   String type="Hatchbacks";
   String trasmission="Manual";
 
-  int price=99;
+  int price=199;
   bool classic=true;
   bool isSwitched = false;
   int i = 1;
+  double returnprice(int i){
+    if(i==1){
+      return 199;
+    }else if(i>=8){
+      return (i*Price.price.hourlyChargesPrice)+300;
+    }else if(i>=6){
+      return (i*Price.price.hourlyChargesPrice)+150;
+    }
+    return i*Price.price.hourlyChargesPrice;
+  }
   Widget r (double w, int y)=>InkWell(
     onTap: (){
       setState(() {
         i=y;
-        if(isSwitched){
-          price=(369*y).toInt()+40;
+        if(!isSwitched){
+          double base = returnprice(y);
+          print(base);
+          price=(base).toInt();
         }else{
-          price=(369*y).toInt();
+          double base = returnprice(y);
+          print(base);
+          price=((base)+100).toInt();
         }
       });
     },

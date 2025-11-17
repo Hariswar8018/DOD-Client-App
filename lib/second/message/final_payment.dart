@@ -60,6 +60,13 @@ class _Final_PaymentState extends State<Final_Payment> {
     }
   }
 
+
+  bool progress = false;
+  void on(bool h){
+    setState(() {
+
+    });
+  }
   void initState(){
     vsdiscount();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
@@ -277,10 +284,13 @@ class _Final_PaymentState extends State<Final_Payment> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       header("Fare Estimate"),
-                      ro("Driver Cost","₹${(widget.price*0.75).toStringAsFixed(1)}"),
+                      widget.waitinghours>=6?ro("Food Allowance ( Time > 6 hr )","₹150"):SizedBox(),
+                      widget.waitinghours>=8?ro("Stay Allowance ( Time > 8 hr )","₹150"):SizedBox(),
+                      widget.waitinghours>=6?SizedBox(height: 9,):SizedBox(),
+                      ro("Driver Cost","₹${(((widget.price+ri())*0.75)).toStringAsFixed(1)}"),
                       ro("Est. Commision","₹${(widget.price*0.02).toStringAsFixed(1)}"),
                       ro("Total GST","₹${(widget.price*0.18).toStringAsFixed(1)}"),
-                      ro1("Total Amount Paid","₹${widget.price}"),
+                      ro1("Total Amount to be Paid","₹${widget.price}"),
                     ],
                   ),
                 ),
@@ -411,9 +421,16 @@ class _Final_PaymentState extends State<Final_Payment> {
       backgroundColor: Colors.white,
     );
   }
+  int ri(){
+    if(widget.waitinghours>=8){
+      return -300;
+    }else if(widget.waitinghours>=6){
+      return -150;
+    }
+    return -0;
+  }
 
   String formatDateTime(DateTime dateTime) {
-    // Format: DD MonthName, HH:MM AM/PM
     final DateFormat formatter = DateFormat('dd MMMM, hh:mm a');
     return formatter.format(dateTime);
   }
@@ -544,7 +561,7 @@ class _Final_PaymentState extends State<Final_Payment> {
       print("Response: ${response.data}");
       if(response.statusCode==200||response.statusCode==201){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(time: widget.date,
-          address: widget.pickup, tid: paymentid,)));
+          address: widget.pickup, hour: widget.waitinghours.toString(), )));
         return ;
       }
       Send.message(context, "Error ${response.statusMessage}", false);

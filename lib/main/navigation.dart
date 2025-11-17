@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../api.dart';
+import '../global/price.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});
@@ -33,6 +34,7 @@ class _NavigationState extends State<Navigation> {
   };
 
   void initState(){
+    Price.gets();
     v();
   }
 
@@ -54,7 +56,6 @@ class _NavigationState extends State<Navigation> {
       Global.mylat=position.latitude;
       Global.mylong=position.longitude;
     });
-
   }
 
 

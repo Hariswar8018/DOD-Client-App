@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 import '../../login/bloc/login/state.dart';
 
 class BookingSuccess extends StatelessWidget {
-  DateTime time; String address, tid;
-   BookingSuccess({super.key,required this.time,required this.address,required this.tid});
+  DateTime time;
+  String address, hour;
+   BookingSuccess({super.key,required this.time,required this.address,required this.hour});
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +46,10 @@ class BookingSuccess extends StatelessWidget {
                   children: [
                     header("Order Details"),
                     ro("Order Id ","#DOD${time.millisecondsSinceEpoch}"),
-                    ro("Payment Id","UTETYWY8E98289W"),
                     Divider(),
                     ro("Pickup Time & Date",formatDateTime(time)),
-                    ro("Pickup Location",""),
-                    ro("Pickup Time & Date",""),
+                    ro("Hour",hour),
+                    ro("Pickup Address",address.substring(0,28)+"..."),
                   ],
                 ),
               ),

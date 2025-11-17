@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:dod/global/price.dart';
 import 'package:dod/second/message/success.dart' show BookingSuccess;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,395 +27,506 @@ class Daily_Driver extends StatefulWidget {
 }
 
 class _Daily_DriverState extends State<Daily_Driver> {
+  Widget header(String str)=>Padding(
+    padding: const EdgeInsets.only(bottom: 7.0),
+    child: Text(str,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 20),),
+  );
+  Widget header1(String str)=>Padding(
+    padding: const EdgeInsets.only(bottom: 1.0),
+    child: Text(str,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15),),
+  );
+  Widget desc(String str)=>Padding(
+    padding: const EdgeInsets.only(bottom: 7.0),
+    child: Text(str,style: TextStyle(fontWeight: FontWeight.w400,fontSize: 13,color: Colors.grey.shade700),),
+  );
+  Widget ro(String sr,String str2)=>Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(sr),
+      Text(str2),
+    ],);
+  Widget ro1(String sr,String str2)=>Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(sr,style: TextStyle(fontSize: 19,fontWeight: FontWeight.w700),),
+      Text(str2,style: TextStyle(fontSize: 19,fontWeight: FontWeight.w700),),
+    ],);
+
   @override
+
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        automaticallyImplyLeading: true,
-        iconTheme: IconThemeData(
-            color: Colors.white
+    return WillPopScope(
+      onWillPop: () {
+        if (confirm) {
+          setState(() {
+            confirm = false;
+          });
+          return Future.value(false);
+        } else {
+          return Future.value(true);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          automaticallyImplyLeading: true,
+          iconTheme: IconThemeData(
+              color: Colors.white
+          ),
+          centerTitle: false,
+          title: Text("Daily DOD Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
         ),
-        centerTitle: false,
-        title: Text("Daily DOD Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
-      ),
-      body:Container(
-          width: w,
-          height: h,
-          child: SingleChildScrollView(
-            child: Container(
-              width: w,
-              height: 700,
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10,),
-                  Center(
-                    child: Container(
-                      width: w-20,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4), // Rounded corners
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            spreadRadius: 1, // How much the shadow spreads
-                            blurRadius: 6, // Softness of the shadow
-                            offset: Offset(0, 3), // Shadow position (x, y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(width: 15,),
-                          Icon(Icons.import_export,color: Colors.green,),
-                          SizedBox(width: 10,),
-                          Container(
-                              width: w-90,
-                              child: Text(widget.pickup,style: TextStyle(fontSize: 12),)),
-                          SizedBox(width: 8,),
-                        ],
-                      ),
-                    ),
+        body:confirm ? SingleChildScrollView(
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: w-20,
+                  margin: EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: Colors.grey.shade400
+                      )
                   ),
-                  Center(
-                    child: Container(
-                      width: w-20,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4), // Rounded corners
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1), // Shadow color
-                            spreadRadius: 1, // How much the shadow spreads
-                            blurRadius: 6, // Softness of the shadow
-                            offset: Offset(0, 3), // Shadow position (x, y)
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(width: 15,),
-                          Icon(Icons.import_export,color: Colors.green,),
-                          SizedBox(width: 10,),
-                          Container(
-                              width: w-90,
-                              child: Text(widget.drop,style: TextStyle(fontSize: 12),)),
-                          SizedBox(width: 8,)
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  Text("   Select Car Type",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                  SizedBox(height: 5),
-                  InkWell(
-                    onTap: (){
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Container(
-                              padding: EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: Text(
-                                      "Select Transmission & Car Types",
-                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Divider(),
-                                  Text(
-                                    "Transmission",
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                  ),
-                                  SizedBox(height: 4,),
-                                  Row(
-                                    children: [
-                                      InkWell(
-                                        onTap:(){
-                                          setState(() {
-                                            trasmission="Manual";
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                          decoration:BoxDecoration(
-                                              color:trasmission=="Manual"?Colors.white:Colors.blue.shade50,
-                                              borderRadius: BorderRadius.circular(10)
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                            child: Center(child: Text("Manual")),
-                                          ),
-                                        ),
-                                      ),SizedBox(width: 9,),
-                                      InkWell(
-                                        onTap:(){
-                                          setState(() {
-                                            trasmission="Automatic";
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        child: Container(
-                                          decoration:BoxDecoration(
-                                              color:trasmission=="Automatic"?Colors.white:Colors.blue.shade50,
-                                              borderRadius: BorderRadius.circular(10)
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                            child: Center(child: Text("Automatic")),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 10,),
-                                  Text(
-                                    "Car Type",
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                  ),
-                                  SizedBox(height: 4,),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      con("Hatchbacks", w),
-                                      con("Sedan", w),
-                                      con("SUV", w),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Row(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(width: 15,),
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.grey.shade300,
-                                  width: 0.8
-                              ),
-                              borderRadius: BorderRadius.circular(5)
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
-                            child: Row(
-                              children: [
-                                Icon(Icons.car_crash,color: Colors.green,),
-                                SizedBox(width: 9),
-                                Text(type,style: TextStyle(fontWeight: FontWeight.w700),),
-                                SizedBox(width: 7,),
-                                Icon(Icons.keyboard_arrow_down_rounded,),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8,),
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.grey.shade300,
-                                  width: 0.8
-                              ),
-                              borderRadius: BorderRadius.circular(5)
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
-                            child: Row(
-                              children: [
-                                Icon(Icons.auto_awesome_mosaic,color: Colors.green,),
-                                SizedBox(width: 9),
-                                Text(trasmission,style: TextStyle(fontWeight: FontWeight.w700),),
-                                SizedBox(width: 7,),
-                                Icon(Icons.keyboard_arrow_down_rounded,),
-                              ],
-                            ),
-                          ),
-                        ),
+                        header("Car Type"),
+                        ro("Trip Type","Daily Driver "),
+                        ro("Car Type",type),
+                        ro("Transmission",trasmission),
+                        ro("DOD Secured Trip","No"),
+                        ro("Hours to be used ( Daily )","${i} hr"),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20,),
-                  Text("   Select Estimated per Day Usage",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      SizedBox(width: 10,),
-                      r(w, 4),r(w, 6),r(w, 8),
-                      r(w, 10),r(w, 12)
-                    ],
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: w-20,
+                  margin: EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: Colors.grey.shade400
+                      )
                   ),
-                  SizedBox(height: 15,),
-                  ""==""?SizedBox():Row(
-                    children: [
-                      Text("   Trip is DOD Secured ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                      Spacer(),
-                      Switch(
-                        value: isSwitched,
-                        onChanged: (value) {
-                          setState(() {
-                            isSwitched = value;
-                            if(isSwitched){
-
-                              price=price+40;
-                            }else{
-                              price=price-40;
-                            }
-                          });
-                        },
-                        activeColor: Colors.green.shade200,
-                        inactiveThumbColor: Colors.grey,
-                        inactiveTrackColor: Colors.grey[300],
-                      ),
-                      SizedBox(width: 10,)
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header("Address"),
+                        header1("Your Pickup Location"),
+                        desc(widget.pickup),
+                        SizedBox(height: 10,),
+                        header1("Drop Location"),
+                        desc(widget.drop),
+                        SizedBox(height: 10,),
+                        header1("PickUp Time"),
+                        desc("${selectedValue}"),
+                        SizedBox(height: 10,),
+                        header1("Start Date"),
+                        desc(formatDateWithDay(date.first.toString())),
+                        SizedBox(height: 10,),
+                        header1("End Date"),
+                        desc(formatDateWithDay(date.last.toString())),
+                        SizedBox(height: 10,),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 22),
-                  Text("   Select PickUp Time ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                  SizedBox(height: 10,),
-                  Center(
-                    child: Container(
-                      width: w - 20,
-                      height: 45,
-                      decoration: BoxDecoration(
+                ),
+              ),
+              Center(
+                child: Container(
+                  width: w-20,
+                  margin: EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: Colors.grey.shade400
+                      )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header("Coupons"),
+                        desc("You haven't chosen any Coupon for this Order")
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                  child: Container(
+                    width: w-20,
+                    margin: EdgeInsets.only(top: 15),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
                         border: Border.all(
-                          color: Colors.grey.shade200,
-                        ),
-                        borderRadius: BorderRadius.circular(5), // Optional rounded corners
+                            color: Colors.grey.shade400
+                        )
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          header("Fare Estimate"),
+                          i>=6?ro("Food Allowance ( Time > 6 hr )","₹150"):SizedBox(),
+                          i>=8?ro("Stay Allowance ( Time > 8 hr )","₹150"):SizedBox(),
+                          i>=6?SizedBox(height: 9,):SizedBox(),
+                          ro("Driver Cost","₹${((0.75*(price+ri()))).toStringAsFixed(1)}"),
+                          ro("Est. Commision","₹${(0.02*price).toStringAsFixed(1)}"),
+                          ro("Total GST","₹${(0.18*price).toStringAsFixed(1)}"),
+                          ro1("Total Amount Paid","₹${price}"),
+                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                        child: DropdownButtonHideUnderline( // Removes underline
-                          child: DropdownButton<String>(
-                            isExpanded: true, // Makes dropdown fill the width
-                            hint: Text("Select a Time"),
-                            value: selectedValue,
-                            items: items.map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(item),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                selectedValue = newValue;
-                              });
-                            },
-                          ),
+                    ),
+                  )
+              ),
+              Center(
+                child: Container(
+                  width: w-20,
+                  margin: EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: Colors.grey.shade400
+                      )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header("Payment Method"),
+                        listtile(w, 2, "Pay by Cash", "Pay after the Drive is Completed each day")
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              i==1?Center(
+                child: Container(
+                  width: w-20,
+                  margin: EdgeInsets.only(top: 15),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                          color: Colors.grey.shade400
+                      )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header("To be Paid Now"),
+                        ro("Total Payment","₹${09}"),
+                        ro("Payment to be done by Cash","₹${(0.00).toStringAsFixed(1)}"),
+                        ro1("Payment to be done Now","₹${(0999).toStringAsFixed(1)}"),
+                      ],
+                    ),
+                  ),
+                ),
+              ):SizedBox(),
+              SizedBox(height: 15,),
+              Text("Cancellation Policy",style: TextStyle(color: Colors.red,fontWeight: FontWeight.w800,fontSize: 15),),
+              SizedBox(height: 60,)
+            ],
+          ),
+        ):Container(
+            width: w,
+            height: h,
+            child: SingleChildScrollView(
+              child: Container(
+                width: w,
+                height: 700,
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 10,),
+                    Center(
+                      child: Container(
+                        width: w-20,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4), // Rounded corners
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1), // Shadow color
+                              spreadRadius: 1, // How much the shadow spreads
+                              blurRadius: 6, // Softness of the shadow
+                              offset: Offset(0, 3), // Shadow position (x, y)
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(width: 15,),
+                            Icon(Icons.location_on_sharp,color: Colors.red,),
+                            SizedBox(width: 10,),
+                            Container(
+                                width: w-90,
+                                child: Text(widget.pickup,style: TextStyle(fontSize: 12),)),
+                            SizedBox(width: 8,),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 22),
-                  Text("   Select Pickup Dates ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                  SizedBox(height: 10,),
-                  Center(
-                    child: InkWell(
-                      onTap: () async {
-                        List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+                    Center(
+                      child: Container(
+                        width: w-20,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4), // Rounded corners
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1), // Shadow color
+                              spreadRadius: 1, // How much the shadow spreads
+                              blurRadius: 6, // Softness of the shadow
+                              offset: Offset(0, 3), // Shadow position (x, y)
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(width: 15,),
+                            Icon(Icons.import_export,color: Colors.green,),
+                            SizedBox(width: 10,),
+                            Container(
+                                width: w-90,
+                                child: Text(widget.drop,style: TextStyle(fontSize: 12),)),
+                            SizedBox(width: 8,)
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    Text("   Select Car Type",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                    SizedBox(height: 5),
+                    InkWell(
+                      onTap: (){
+                        showDialog(
                           context: context,
-                          startInitialDate: DateTime.now(),
-                          startFirstDate: DateTime.now(),
-                          startLastDate: DateTime.now().add(
-                            const Duration(days: 10),
-                          ),
-                          endInitialDate: DateTime.now(),
-                          endFirstDate:DateTime.now(),
-                          endLastDate: DateTime.now().add(
-                            const Duration(days: 30),
-                          ),
-                          is24HourMode: false,
-                          isShowSeconds: false,
-                          minutesInterval: 1,
-                          secondsInterval: 1,
-                          isForce2Digits: false,
-                          isForceEndDateAfterStartDate: true,
-                          onStartDateAfterEndDateError: () {
-                            // Handle error when start date is after end date
-                            print('Start date cannot be after end date!');
-                          },
-                          borderRadius: const BorderRadius.all(Radius.circular(16)),
-                          constraints: const BoxConstraints(
-                            maxWidth: 350,
-                            maxHeight: 650,
-                          ),
-                          transitionBuilder: (context, anim1, anim2, child) {
-                            return FadeTransition(
-                              opacity: anim1.drive(
-                                Tween(
-                                  begin: 0,
-                                  end: 1,
+                          builder: (context) {
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        "Select Transmission & Car Types",
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Divider(),
+                                    Text(
+                                      "Transmission",
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                    ),
+                                    SizedBox(height: 4,),
+                                    Row(
+                                      children: [
+                                        InkWell(
+                                          onTap:(){
+                                            setState(() {
+                                              trasmission="Manual";
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            decoration:BoxDecoration(
+                                                color:trasmission=="Manual"?Colors.white:Colors.blue.shade50,
+                                                borderRadius: BorderRadius.circular(10)
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
+                                              child: Center(child: Text("Manual")),
+                                            ),
+                                          ),
+                                        ),SizedBox(width: 9,),
+                                        InkWell(
+                                          onTap:(){
+                                            setState(() {
+                                              trasmission="Automatic";
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            decoration:BoxDecoration(
+                                                color:trasmission=="Automatic"?Colors.white:Colors.blue.shade50,
+                                                borderRadius: BorderRadius.circular(10)
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
+                                              child: Center(child: Text("Automatic")),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10,),
+                                    Text(
+                                      "Car Type",
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                    ),
+                                    SizedBox(height: 4,),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        con("Hatchbacks", w),
+                                        con("Sedan", w),
+                                        con("SUV", w),
+                                      ],
+                                    )
+                                  ],
                                 ),
                               ),
-                              child: child,
                             );
                           },
-                          transitionDuration: const Duration(milliseconds: 200),
-                          barrierDismissible: true,
-                          barrierColor: Colors.black54,
-                          startSelectableDayPredicate: (dateTime) {
-                            if (dateTime == DateTime(2023, 2, 25)) {
-                              return false;
-                            } else {
-                              return true;
-                            }
-                          },
-                          endSelectableDayPredicate: (dateTime) {
-                            // Disable 26th Feb 2023 for end date
-                            if (dateTime == DateTime(2023, 2, 26)) {
-                              return false;
-                            } else {
-                              return true;
-                            }
-                          },
-                          type: OmniDateTimePickerType.date,
-                          title: Text('Select Date & Time Range'),
-                          titleSeparator: Divider(),
-                          startWidget: Text('Start'),
-                          endWidget: Text('End'),
-                          separator: SizedBox(height: 16),
-                          defaultTab: DefaultTab.start,
-                          padding: EdgeInsets.all(16),
-                          insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
-                          theme: ThemeData.light(),
                         );
-                        if(dateTimeList!=null){
-                          List<DateTime> allDates = getDatesBetween(dateTimeList.first, dateTimeList.last);
-                            date=allDates;
-                          setState(() {
-
-                          });
-                        }
                       },
+                      child: Row(
+                        children: [
+                          SizedBox(width: 15,),
+                          Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 0.8
+                                ),
+                                borderRadius: BorderRadius.circular(5)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.car_crash,color: Colors.green,),
+                                  SizedBox(width: 9),
+                                  Text(type,style: TextStyle(fontWeight: FontWeight.w700),),
+                                  SizedBox(width: 7,),
+                                  Icon(Icons.keyboard_arrow_down_rounded,),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8,),
+                          Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 0.8
+                                ),
+                                borderRadius: BorderRadius.circular(5)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.auto_awesome_mosaic,color: Colors.green,),
+                                  SizedBox(width: 9),
+                                  Text(trasmission,style: TextStyle(fontWeight: FontWeight.w700),),
+                                  SizedBox(width: 7,),
+                                  Icon(Icons.keyboard_arrow_down_rounded,),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    Text("   Select Estimated per Day Usage",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        SizedBox(width: 10,),
+                        r(w, 4),r(w, 6),r(w, 8),
+                        r(w, 10),r(w, 12)
+                      ],
+                    ),
+                    SizedBox(height: 7,),
+                    i>=6?Center(
+                      child: Container(
+                        width: w-20,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Colors.orange.shade200,
+                            borderRadius: BorderRadius.circular(3)
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 13),
+                          child: Row(
+                            children: [
+                              Icon(Icons.lightbulb,size: 20,),SizedBox(width: 6,),
+                              Text(i>=8?"More than 8 hour will fetch Driver Food & Stay Allowance":"More than 6 hour will fetch Driver Food Allowance too"
+                                ,style: TextStyle(fontSize: 11),),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ):SizedBox(),
+                    SizedBox(height: 15,),
+                    ""==""?SizedBox():Row(
+                      children: [
+                        Text("   Trip is DOD Secured ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                        Spacer(),
+                        Switch(
+                          value: isSwitched,
+                          onChanged: (value) {
+                            setState(() {
+                              isSwitched = value;
+                              if(isSwitched){
+
+                                price=price+40;
+                              }else{
+                                price=price-40;
+                              }
+                            });
+                          },
+                          activeColor: Colors.green.shade200,
+                          inactiveThumbColor: Colors.grey,
+                          inactiveTrackColor: Colors.grey[300],
+                        ),
+                        SizedBox(width: 10,)
+                      ],
+                    ),
+                    SizedBox(height: 22),
+                    Text("   Select PickUp Time ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                    SizedBox(height: 10,),
+                    Center(
                       child: Container(
                         width: w - 20,
                         height: 45,
@@ -425,80 +537,250 @@ class _Daily_DriverState extends State<Daily_Driver> {
                           borderRadius: BorderRadius.circular(5), // Optional rounded corners
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(date.isNotEmpty?"${date.length} Days Chosen":"Choose Dates",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
-                        )
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  ""==""?SizedBox():Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("   Select Driver Language ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Container(
-                          width: w/2-15,
-                          child: MultiSelectDialogField(
-                            items: item.map((e) => MultiSelectItem<String>(e, e)).toList(),
-                            title: Text("Select Language"),
-                            selectedColor: Colors.blue,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                              border: Border.all(
-                                color: Colors.grey.shade200,
-                                width: 1,
-                              ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                          child: DropdownButtonHideUnderline( // Removes underline
+                            child: DropdownButton<String>(
+                              isExpanded: true, // Makes dropdown fill the width
+                              hint: Text("Select a Time"),
+                              value: selectedValue,
+                              items: items.map((String item) {
+                                return DropdownMenuItem<String>(
+                                  value: item,
+                                  child: Text(item),
+                                );
+                              }).toList(),
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedValue = newValue;
+                                });
+                              },
                             ),
-                            buttonText: Text(
-                              selectedValue1.isEmpty?"Select Lang":"${selectedValue1.length} Languages",
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 16,
-                              ),
-                            ),
-                            chipDisplay: MultiSelectChipDisplay.none(),
-                            onConfirm: (results) {
-                              setState(() {
-                                selectedValue1 = results;
-                              });
-                            },
                           ),
                         ),
-                      )
+                      ),
+                    ),
+                    SizedBox(height: 22),
+                    Text("   Select Pickup Dates ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                    SizedBox(height: 10,),
+                    Center(
+                      child: InkWell(
+                        onTap: () async {
+                          List<DateTime>? dateTimeList = await showOmniDateTimeRangePicker(
+                            context: context,
+                            startInitialDate: DateTime.now(),
+                            startFirstDate: DateTime.now(),
+                            startLastDate: DateTime.now().add(
+                              const Duration(days: 10),
+                            ),
+                            endInitialDate: DateTime.now(),
+                            endFirstDate:DateTime.now(),
+                            endLastDate: DateTime.now().add(
+                              const Duration(days: 30),
+                            ),
+                            is24HourMode: false,
+                            isShowSeconds: false,
+                            minutesInterval: 1,
+                            secondsInterval: 1,
+                            isForce2Digits: false,
+                            isForceEndDateAfterStartDate: true,
+                            onStartDateAfterEndDateError: () {
+                              // Handle error when start date is after end date
+                              print('Start date cannot be after end date!');
+                            },
+                            borderRadius: const BorderRadius.all(Radius.circular(16)),
+                            constraints: const BoxConstraints(
+                              maxWidth: 350,
+                              maxHeight: 650,
+                            ),
+                            transitionBuilder: (context, anim1, anim2, child) {
+                              return FadeTransition(
+                                opacity: anim1.drive(
+                                  Tween(
+                                    begin: 0,
+                                    end: 1,
+                                  ),
+                                ),
+                                child: child,
+                              );
+                            },
+                            transitionDuration: const Duration(milliseconds: 200),
+                            barrierDismissible: true,
+                            barrierColor: Colors.black54,
+                            startSelectableDayPredicate: (dateTime) {
+                              if (dateTime == DateTime(2023, 2, 25)) {
+                                return false;
+                              } else {
+                                return true;
+                              }
+                            },
+                            endSelectableDayPredicate: (dateTime) {
+                              // Disable 26th Feb 2023 for end date
+                              if (dateTime == DateTime(2023, 2, 26)) {
+                                return false;
+                              } else {
+                                return true;
+                              }
+                            },
+                            type: OmniDateTimePickerType.date,
+                            title: Text('Select Date & Time Range'),
+                            titleSeparator: Divider(),
+                            startWidget: Text('Start'),
+                            endWidget: Text('End'),
+                            separator: SizedBox(height: 16),
+                            defaultTab: DefaultTab.start,
+                            padding: EdgeInsets.all(16),
+                            insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+                            theme: ThemeData.light(),
+                          );
+                          if(dateTimeList!=null){
+                            List<DateTime> allDates = getDatesBetween(dateTimeList.first, dateTimeList.last);
+                              date=allDates;
+                            setState(() {
 
-                    ],
-                  ),
-                ],
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: w - 20,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                            ),
+                            borderRadius: BorderRadius.circular(5), // Optional rounded corners
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(date.isNotEmpty?"${date.length} Days Chosen":"Choose Dates",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 16),),
+                          )
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    ""==""?SizedBox():Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("   Select Driver Language ",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Container(
+                            width: w/2-15,
+                            child: MultiSelectDialogField(
+                              items: item.map((e) => MultiSelectItem<String>(e, e)).toList(),
+                              title: Text("Select Language"),
+                              selectedColor: Colors.blue,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                border: Border.all(
+                                  color: Colors.grey.shade200,
+                                  width: 1,
+                                ),
+                              ),
+                              buttonText: Text(
+                                selectedValue1.isEmpty?"Select Lang":"${selectedValue1.length} Languages",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              chipDisplay: MultiSelectChipDisplay.none(),
+                              onConfirm: (results) {
+                                setState(() {
+                                  selectedValue1 = results;
+                                });
+                              },
+                            ),
+                          ),
+                        )
+
+                      ],
+                    ),
+                  ],
+                ),
               ),
+            )
+        ),
+        persistentFooterButtons: [
+          progress ? Center(child: CircularProgressIndicator(),):InkWell(
+            onTap: () async {
+              if(date.isEmpty){
+                Send.message(context, "Choose Date", false);
+                return ;
+              }
+              if(selectedValue==null){
+                Send.message(context, "Choose Time", false);
+                return ;
+              }
+              if(confirm){
+                start();
+              }else{
+                setState(() {
+                  confirm = true;
+                });
+              }
+
+            },
+            child: Container(
+                width: w-20,
+                height: 45,
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                child: Center(child: Text("Continue to Shedule Driver",style: TextStyle(color: Colors.white,),))
             ),
           )
+        ],
       ),
-      persistentFooterButtons: [
-        progress ? Center(child: CircularProgressIndicator(),):InkWell(
-          onTap: () async {
-            if(date.isEmpty){
-              Send.message(context, "Choose Date", false);
-              return ;
-            }
-            start();
-          },
-          child: Container(
-              width: w-20,
-              height: 45,
-              decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(10)
-              ),
-              child: Center(child: Text("Continue to Shedule Driver",style: TextStyle(color: Colors.white,),))
-          ),
-        )
-      ],
-
     );
   }
+
+
+  int ri(){
+    if(i>=8){
+      return -300;
+    }else if(i>=6){
+      return -150;
+    }
+    return -0;
+  }
+  int  h = 2;
+  Widget listtile(double w,int j, String str, String str2)=>InkWell(
+    child: Container(
+      width: w-25,
+      height: 60,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+              color: Colors.blue
+          )
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.blue,
+              radius: 10,
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(str,style: TextStyle(fontWeight: FontWeight.w700,fontSize: 15),),
+              Text(str2,style: TextStyle(fontSize: 11),),
+            ],
+          )
+        ],
+      ),
+    ),
+  );
+
+  bool confirm = false ;
   Future<void> start() async {
 
     on(true);
@@ -586,10 +868,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
       "${dates.last.year}-${dates.last.month.toString().padLeft(2, '0')}-${dates.last.day.toString().padLeft(2, '0')}",
       "days": days,
     };
-
-
     print("Sending payload: $data");
-
     try {
       final response = await dio.post(
         Api.apiurl + "user-booking-create",
@@ -605,8 +884,8 @@ class _Daily_DriverState extends State<Daily_Driver> {
       if(response.statusCode==200||response.statusCode==201){
         on(false);
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>BookingSuccess(
-          time: date.last,
-          address: widget.pickup, tid: "${DateTime.now().millisecondsSinceEpoch}",)));
+          time: date.first,
+          address: widget.pickup,  hour:i.toString(),)));
         return ;
       }
       on(false);
@@ -621,6 +900,32 @@ class _Daily_DriverState extends State<Daily_Driver> {
       print("Error during API call: $e");
     }
   }
+  String formatDateWithDay(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+
+      // Format DD/MM/YYYY
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+      final year = date.year.toString();
+
+      // Day name
+      final dayName = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ][date.weekday - 1];
+
+      return "$day/$month/$year ($dayName)";
+    } catch (e) {
+      return dateString; // If parsing fails, return original
+    }
+  }
+
   bool progress = false;
   void on(bool given){
     setState(() {
@@ -673,10 +978,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
 
   List<DateTime> date = [];
   Razorpay _razorpay = Razorpay();
-  String? selectedValue; // Store the selected value
-
-  // List of items for the dropdown
-// Existing fruits
+  String? selectedValue;
   final List<String> items = [];
 
 // Add time slots from 1:00 AM to 12:00 PM
@@ -694,7 +996,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
   void initState() {
     super.initState();
     addTimeSlots();
-
+    Price.gets();
   }
 
 
@@ -790,10 +1092,13 @@ class _Daily_DriverState extends State<Daily_Driver> {
     onTap: (){
       setState(() {
         i=y;
-        if(isSwitched){
-          price=(369*y).toInt()+40;
+        double baseprice  = Price.price.hourlyChargesPrice;
+        if(y>=8){
+          price = ((baseprice*y)+300).toInt();
+        }else if(y>=6){
+          price = ((baseprice*y)+150).toInt();
         }else{
-          price=(369*y).toInt();
+          price = (baseprice*y).toInt();
         }
       });
     },

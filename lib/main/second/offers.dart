@@ -32,7 +32,7 @@ class _OffersState extends State<Offers> {
           headers: {"Authorization": "Bearer ${UserModel.token}"},
         ),
       );
-
+      print(UserModel.token);
       if (response.statusCode == 200) {
         final couponResponse = CouponResponse.fromJson(response.data);
         setState(() {
@@ -96,15 +96,12 @@ class OfferCard extends StatelessWidget {
               headers: {"Authorization": "Bearer ${UserModel.token}"},
             ),
           );
-
           print("Status: ${response.statusCode}");
           print("Response: ${response.data}");
-
           if (response.statusCode == 200 || response.statusCode == 201) {
             Navigator.pop(context,coupon.code);
             return;
           }
-
           Send.message(context, "Error ${response.statusMessage}", false);
         } catch (e) {
           Send.message(context, "Error $e", false);
