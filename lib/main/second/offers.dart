@@ -9,7 +9,8 @@ import '../../model/coupon.dart';
 import '../../model/ordermodel.dart';
 
 class Offers extends StatefulWidget {
-   Offers({super.key});
+  bool show;
+   Offers({super.key,this.show=true});
 
   @override
   State<Offers> createState() => _OffersState();
@@ -66,7 +67,7 @@ class _OffersState extends State<Offers> {
         itemCount: coupons.length,
         itemBuilder: (context, index) {
           final coupon = coupons[index];
-          return OfferCard(coupon: coupon);
+          return OfferCard(coupon: coupon,show: widget.show,);
         },
       ),
 
@@ -75,38 +76,17 @@ class _OffersState extends State<Offers> {
 }
 
 class OfferCard extends StatelessWidget {
-  CouponModel coupon ;
-   OfferCard({super.key,required this.coupon});
+  CouponModel coupon ; bool show;
+   OfferCard({super.key,required this.coupon,required this.show});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        final Dio dio = Dio(
-          BaseOptions(validateStatus: (status) => status != null && status < 500),
-        );
-        try {
-          final response = await dio.post(
-            Api.apiurl + "user-apply-coupon",
-            data: {
-              "code":coupon.code,
-              "order_amount":100,
-            },
-            options: Options(
-              headers: {"Authorization": "Bearer ${UserModel.token}"},
-            ),
-          );
-          print("Status: ${response.statusCode}");
-          print("Response: ${response.data}");
-          if (response.statusCode == 200 || response.statusCode == 201) {
-            Navigator.pop(context,coupon.code);
-            return;
-          }
-          Send.message(context, "Error ${response.statusMessage}", false);
-        } catch (e) {
-          Send.message(context, "Error $e", false);
-          print("Error during API call: $e");
+        if(!show){
+          return ;
         }
+        Navigator.pop(context,coupon.code);
       },
       child: Card(
         color: Colors.white,

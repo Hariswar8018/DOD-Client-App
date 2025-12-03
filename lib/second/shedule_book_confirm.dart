@@ -17,6 +17,10 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../api.dart';
 import '../global.dart';
 import '../login/bloc/login/view.dart';
+import '../main/car/my_car.dart';
+import '../main/second/offers.dart';
+import '../model/price_response.dart';
+import '../model/usercarmodel.dart';
 
 class Daily_Driver extends StatefulWidget {
   final String pickup, drop;
@@ -53,7 +57,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
     ],);
 
   @override
-
+  UserCarModel? car;
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
@@ -98,9 +102,9 @@ class _Daily_DriverState extends State<Daily_Driver> {
                       children: [
                         header("Car Type"),
                         ro("Trip Type","Daily Driver "),
-                        ro("Car Type",type),
-                        ro("Transmission",trasmission),
-                        ro("DOD Secured Trip","No"),
+                        ro("Car Type",car!.fueltype.toString()),
+                        ro("Transmission",car!.transmission.toString()),
+                        ro("Car Number",car!.number),
                         ro("Hours to be used ( Daily )","${i} hr"),
                       ],
                     ),
@@ -181,13 +185,13 @@ class _Daily_DriverState extends State<Daily_Driver> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           header("Fare Estimate"),
-                          i>=6?ro("Food Allowance ( Time > 6 hr )","₹150"):SizedBox(),
-                          i>=8?ro("Stay Allowance ( Time > 8 hr )","₹150"):SizedBox(),
+                          i>=6?ro("Food Allowance ( Time > 6 hr )","₹${priceData!.foodAllowance}"):SizedBox(),
+                          i>=8?ro("Stay Allowance ( Time > 8 hr )","₹${priceData!.stayAllowance}"):SizedBox(),
                           i>=6?SizedBox(height: 9,):SizedBox(),
-                          ro("Driver Cost","₹${((0.75*(price+ri()))).toStringAsFixed(1)}"),
-                          ro("Est. Commision","₹${(0.02*price).toStringAsFixed(1)}"),
-                          ro("Total GST","₹${(0.18*price).toStringAsFixed(1)}"),
-                          ro1("Total Amount Paid","₹${price}"),
+                          ro("Driver Cost","₹${priceData!.perHourCharge} x ${i.toInt()} hr"),
+                          ro("Coin Uses","₹${priceData!.coinUses}"),
+                          ro("Total Discount","₹${priceData!.discountAmount}"),
+                          ro1("Total Amount to be Paid","₹${priceData!.subTotal}"),
                         ],
                       ),
                     ),
@@ -319,109 +323,21 @@ class _Daily_DriverState extends State<Daily_Driver> {
                     SizedBox(height: 20,),
                     Text("   Select Car Type",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                     SizedBox(height: 5),
+                    SizedBox(height: 5),
                     InkWell(
-                      onTap: (){
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 10,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        "Select Transmission & Car Types",
-                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    Divider(),
-                                    Text(
-                                      "Transmission",
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                    ),
-                                    SizedBox(height: 4,),
-                                    Row(
-                                      children: [
-                                        InkWell(
-                                          onTap:(){
-                                            setState(() {
-                                              trasmission="Manual";
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            decoration:BoxDecoration(
-                                                color:trasmission=="Manual"?Colors.white:Colors.blue.shade50,
-                                                borderRadius: BorderRadius.circular(10)
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                              child: Center(child: Text("Manual")),
-                                            ),
-                                          ),
-                                        ),SizedBox(width: 9,),
-                                        InkWell(
-                                          onTap:(){
-                                            setState(() {
-                                              trasmission="Automatic";
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            decoration:BoxDecoration(
-                                                color:trasmission=="Automatic"?Colors.white:Colors.blue.shade50,
-                                                borderRadius: BorderRadius.circular(10)
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                              child: Center(child: Text("Automatic")),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10,),
-                                    Text(
-                                      "Car Type",
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                    ),
-                                    SizedBox(height: 4,),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        con("Hatchbacks", w),
-                                        con("Sedan", w),
-                                        con("SUV", w),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
+                      onTap: () async {
+                        UserCarModel cd = await Navigator.push(context,MaterialPageRoute(builder: (_)=>GetMYCAR(select: true,)));
+                        if(cd!=null){
+                          car=cd;
+                          setState(() {
+
+                          });
+                        }
                       },
                       child: Row(
                         children: [
                           SizedBox(width: 15,),
-                          Container(
+                          car==null?Container(
                             decoration: BoxDecoration(
                                 border: Border.all(
                                     color: Colors.grey.shade300,
@@ -435,15 +351,13 @@ class _Daily_DriverState extends State<Daily_Driver> {
                                 children: [
                                   Icon(Icons.car_crash,color: Colors.green,),
                                   SizedBox(width: 9),
-                                  Text(type,style: TextStyle(fontWeight: FontWeight.w700),),
-                                  SizedBox(width: 7,),
-                                  Icon(Icons.keyboard_arrow_down_rounded,),
+                                  Text("Select Car for the Drive",style: TextStyle(fontWeight: FontWeight.w700),),
+                                  SizedBox(width: 12,),
+                                  Icon(Icons.arrow_forward,),
                                 ],
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8,),
-                          Container(
+                          ):Container(
                             decoration: BoxDecoration(
                                 border: Border.all(
                                     color: Colors.grey.shade300,
@@ -455,15 +369,16 @@ class _Daily_DriverState extends State<Daily_Driver> {
                               padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
                               child: Row(
                                 children: [
-                                  Icon(Icons.auto_awesome_mosaic,color: Colors.green,),
+                                  Icon(Icons.car_crash,color: Colors.green,),
                                   SizedBox(width: 9),
-                                  Text(trasmission,style: TextStyle(fontWeight: FontWeight.w700),),
+                                  Text(car!.nickName+" Car Selected",style: TextStyle(fontWeight: FontWeight.w700),),
                                   SizedBox(width: 7,),
-                                  Icon(Icons.keyboard_arrow_down_rounded,),
+                                  Icon(Icons.verified,color: Colors.blue,),
                                 ],
                               ),
                             ),
                           ),
+
                         ],
                       ),
                     ),
@@ -693,7 +608,6 @@ class _Daily_DriverState extends State<Daily_Driver> {
                             ),
                           ),
                         )
-
                       ],
                     ),
                   ],
@@ -701,41 +615,145 @@ class _Daily_DriverState extends State<Daily_Driver> {
               ),
             )
         ),
+        backgroundColor: Colors.white,
         persistentFooterButtons: [
-          progress ? Center(child: CircularProgressIndicator(),):InkWell(
-            onTap: () async {
-              if(date.isEmpty){
-                Send.message(context, "Choose Date", false);
-                return ;
-              }
-              if(selectedValue==null){
-                Send.message(context, "Choose Time", false);
-                return ;
-              }
-              if(confirm){
-                start();
-              }else{
-                setState(() {
-                  confirm = true;
-                });
-              }
-
-            },
+          progress ? Center(child: CircularProgressIndicator(),):confirm?InkWell(
+            onTap: start,
             child: Container(
-                width: w-20,
-                height: 45,
-                decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Center(child: Text("Continue to Shedule Driver",style: TextStyle(color: Colors.white,),))
+              width: w-10,
+              height: 45,
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(6)
+              ),
+              child: Center(child: Text("Confirm Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
             ),
+          ):Column(
+            children: [
+              InkWell(
+                onTap: () async {
+                  if(couponid!=""){
+                    couponid="";
+                    setState(() {
+                    });
+                    return ;
+                  }
+                  final op = await Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
+                  if(op==null){
+                    return ;
+                  }
+                  setState(() {
+                    couponid=op.toString();
+                    print(couponid);
+                  });
+                },
+                child:couponid!=""? Padding(
+                  padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
+                  child: Row(
+                    children: [
+                      Icon(Icons.discount,color: Colors.green,),
+                      Text("  1 Offer Selected",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      Spacer(),
+                      Text("  Delete Coupon",style: TextStyle(color: Colors.red,fontWeight: FontWeight.w800),),
+                      Icon(Icons.delete,color: Colors.red,size: 20,),
+                      SizedBox(width: 12,),
+                    ],
+                  ),
+                ):Padding(
+                  padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
+                  child: Row(
+                    children: [
+                      Icon(Icons.discount,color: Colors.green,),
+                      Text(couponid!=""?"  1 Offer Selected":"  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      Spacer(),
+                      Container(width: 1,height: 24,color: Colors.grey,),
+                      SizedBox(width: 9),
+                      Icon(Icons.account_balance,color: Colors.green,),
+                      Text("  Cash / Online",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      SizedBox(width: 12,),
+                      Spacer(),
+                    ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  if(car==null){
+                    Send.message(context, "Please Select a Car", false);
+                    return ;
+                  }
+                  if(date.isEmpty){
+                    Send.message(context, "Choose Date", false);
+                    return ;
+                  }
+                  if(selectedValue==null){
+                    Send.message(context, "Choose Time", false);
+                    return ;
+                  }
+                  double disc = 0.0;
+                  final Dio dio = Dio(
+                    BaseOptions(
+                      baseUrl: "https://dod.brandeducer.host/api/",
+                      validateStatus: (status) => status != null && status < 500,
+                    ),
+                  );
+
+                  try {
+                    final response = await dio.post(
+                      "getPrice",
+                      options: Options(
+                        headers: {
+                          "Accept": "application/json",
+                          "Content-Type": "application/json",
+                          "Authorization": "Bearer ${UserModel.token}", // your token
+                        },
+                      ),
+                      data: {
+                        "coupon_id": couponid,
+                        "booking_type":'monthly',
+                        "trip_type": "upcoming",
+                        "paymentmethod": "cash",
+                        "hours": i,
+                        "coin_used": "",
+                      },
+                    );
+                    print("📦 getPrice Response:");
+                    if(response.statusCode==200||response.statusCode==201){
+                      print(response.data);
+                      final priceResponse = PriceResponse.fromJson(response.data);
+                       priceData= priceResponse.data;
+                      print(priceData.toString());
+                        setState(() {
+                          confirm = true;
+                        });
+                    }else{
+                      Send.message(context, "Error: ${response.data}", false);
+                    }
+
+                  } catch (e) {
+                    Send.message(context, "❌ getPrice Error: $e", false);
+                    print("❌ getPrice Error: $e");
+                  }
+                  return ;
+
+                },
+                child: Container(
+                  width: w-10,
+                  height: 45,
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(6)
+                  ),
+                  child: Center(child: Text("Request Classic Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
+                ),
+              ),
+            ],
           )
         ],
       ),
     );
-  }
-
+  }PriceModel? priceData ;
+  String couponid = "";
 
   int ri(){
     if(i>=8){
@@ -745,6 +763,7 @@ class _Daily_DriverState extends State<Daily_Driver> {
     }
     return -0;
   }
+
   int  h = 2;
   Widget listtile(double w,int j, String str, String str2)=>InkWell(
     child: Container(
@@ -792,10 +811,10 @@ class _Daily_DriverState extends State<Daily_Driver> {
     String utcString = date.last.toUtc().toIso8601String();
 
     double dlat = await latitute(widget.drop);
-    double dlon = await latitute(widget.drop);
+    double dlon = await longitude(widget.drop);
 
     double plat = await latitute(widget.pickup);
-    double plon = await latitute(widget.pickup);
+    double plon = await longitude(widget.pickup);
     double distance = double.parse(
       haversine(plat, plon, dlat, dlon).toStringAsFixed(2),
     );
@@ -847,7 +866,9 @@ class _Daily_DriverState extends State<Daily_Driver> {
         .toList();
 
     final data = {
-      "coupon_id": "",
+      "coupon_id": couponid,
+      "car_id": car!.id,
+      "hours": i,
       "booking_type": "monthly",
       "trip_type": "upcoming",
       "status": "pending",

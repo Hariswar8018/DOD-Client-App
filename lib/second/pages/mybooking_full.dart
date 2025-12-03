@@ -58,7 +58,7 @@ class MyBookingFull extends StatelessWidget {
                 ),
               ),
             ),
-            Center(
+            order.recurringBooking==null?Center(
               child: Container(
                 width: w-20,
                 margin: EdgeInsets.only(top: 15),
@@ -78,7 +78,7 @@ class MyBookingFull extends StatelessWidget {
                       desc(order.pickupLocation),
                       SizedBox(height: 10,),
                       header1("Drop Location"),
-                      desc(order.pickupLocation),
+                      desc(order.dropLocation),
                       SizedBox(height: 10,),
                       header1("PickUp Time"),
                       desc(formatDateTime(order.bookingTime.toString())),
@@ -86,7 +86,7 @@ class MyBookingFull extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            ):c(w),
             Center(
               child: Container(
                 width: w-20,
@@ -169,6 +169,41 @@ class MyBookingFull extends StatelessWidget {
       ),
     );
   }
+  Widget c(double w)=>Center(
+    child: Container(
+      width: w-20,
+      margin: EdgeInsets.only(top: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+              color: Colors.grey.shade400
+          )
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            header("Daily Driver Address & Time"),
+            header1("Your Pickup Location"),
+            desc(order.pickupLocation),
+            SizedBox(height: 10,),
+            header1("Drop Location"),
+            desc(order.dropLocation),
+            SizedBox(height: 10,),
+            header1("Starting Date"),
+            desc(order.recurringBooking!.startDate),
+            SizedBox(height: 10,),
+            header1("Ending Date"),
+            desc(order.recurringBooking!.endDate),
+            SizedBox(height: 10,),
+            header1("Every Day at"),
+            desc(order.recurringBooking!.routes.first.pickupTime+" to "+order.recurringBooking!.routes.first.dropTime),
+          ],
+        ),
+      ),
+    ),
+  );
 
   int i = 0 ;
   Widget listtile(double w,int j, String str, String str2)=>InkWell(

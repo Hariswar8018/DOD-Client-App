@@ -4,6 +4,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dio/dio.dart';
 import 'package:dod/api.dart';
 import 'package:dod/global.dart';
+import 'package:dod/main/car/add_car.dart';
+import 'package:dod/main/car/my_car.dart';
+import 'package:dod/main/coins/mycoins.dart';
 import 'package:dod/main/googlemap.dart';
 import 'package:dod/main/second/offers.dart';
 import 'package:dod/main/second/refer.dart';
@@ -23,6 +26,7 @@ import '../global/contacts.dart';
 import '../login/bloc/login/view.dart';
 import '../model/booking_response.dart';
 import '../model/ordermodel.dart' show OrderModel;
+import '../model/special_offer.dart';
 import '../second/book_daily.dart' show Daily;
 import '../second/pages/my_bookings.dart';
 import '../second/pages/mypayments.dart';
@@ -35,15 +39,46 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  Future<void> getImages() async {
+    final Dio dio = Dio(
+      BaseOptions(
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+
+    try {
+      final response = await dio.post(
+        'https://dod.brandeducer.host/api/getSpecialOffers',
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer ${UserModel.token}",
+          },
+        ),
+      );
+
+      print("Status: ${response.statusCode}");
+
+      final specialOffers = SpecialOffersResponse.fromJson(response.data);
+      print("Parsed data:");
+      print(specialOffers.data.map((e) => e.title).toList());
+      offers = specialOffers.data;
+    } catch (e) {
+      print("Error during API call: $e");
+    }
+  }
+  List<SpecialOffer> offers = [];
 
   void initState() {
     super.initState();
+    getImages();
     all();
   }
 
 
 
   all() async {
+    getImages();
     await getvalue();
     await getCurrentLocation();
     await gets();
@@ -127,18 +162,13 @@ class _HomeState extends State<Home> {
           },
         ),
       );
-
       if (response.statusCode == 200) {
         print(response.data);
         print("----------------------------->");
         print(UserModel.token);
         final bookingsResponse = BookingsResponse.fromJson(response.data);
-        print("✅ Total bookings: ${bookingsResponse.bookings.length}");
-        orders=[];
-        for (var order in bookingsResponse.bookings) {
-          print("📦 Booking ID: ${order.id}, Status: ${order.status}, User: ${order.user.name}");
-          orders.add(order);
-        }
+        final newOrders = bookingsResponse.data.bookings;
+        orders.addAll(newOrders);
       } else {
         print("❌ Error: ${response.statusMessage}");
       }
@@ -498,15 +528,15 @@ class _HomeState extends State<Home> {
                         children: [
                           InkWell(
                               onTap:(){
-                                Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers(show: false,)));
                               },
-                              child: cont(w, Colors.greenAccent.shade100, "assets/normal-forms-svgrepo-com.svg", "Offers & Coupons")),
+                              child: cont(w, Colors.greenAccent.shade100, "assets/coupon-svgrepo-com.svg", "Offers & Coupons")),
                           InkWell(
                               onTap: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (_)=>
                                     MyBookings()));
                               },
-                              child: cont(w, Colors.blue.shade50, "assets/online-order-shopping-ecommerce-svgrepo-com.svg", "My Bookings")),
+                              child: cont(w, Colors.blue.shade50, "assets/order-food-online-computer-covid-online-food-delivery-svgrepo-com.svg", "My Bookings")),
                           InkWell(
                               onTap: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (_)=>Refer()));
@@ -515,12 +545,34 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                       SizedBox(height: 9,),
-
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InkWell(
+                              onTap:(){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>GetMYCAR()));
+                              },
+                              child: cont(w, Colors.yellow.shade50, "assets/car-svgrepo-com.svg", "My Cars")),
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                                    MyCoins()));
+                              },
+                              child: cont(w, Colors.red.shade50, "assets/coins-money-svgrepo-com.svg", "My Coins")),
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyPayments()));
+                              },
+                              child: cont(w, Colors.grey.shade100, "assets/payment-credit-card-svgrepo-com.svg", "Payments")),
+                        ],
+                      ),
+                      SizedBox(height: 9,),
                     ],
                   ),
                 ),
               ),
               SizedBox(height: 25,),
+              // Carousel
               Container(
                 width: w,
                 color: Colors.white,
@@ -540,7 +592,7 @@ class _HomeState extends State<Home> {
                             viewportFraction: 1.0,           // Shows only 1 image at a time
                             autoPlay: true,                  // Optional: autoplay if you want
                           ),
-                          items: special_offer.map((i) {
+                          items: offers.map((i) {
                             return Builder(
                               builder: (BuildContext context) {
                                 return Container(
@@ -548,7 +600,7 @@ class _HomeState extends State<Home> {
                                     margin: EdgeInsets.symmetric(horizontal: 1.0),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(5),
-                                        image: DecorationImage(image: NetworkImage(i),fit: BoxFit.cover)
+                                        image: DecorationImage(image: NetworkImage(i.image),fit: BoxFit.cover)
                                     ),
                                 );
                               },
@@ -561,6 +613,8 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 20,),
+
+              // Learn Driving
               InkWell(
                 onTap: Contacts.launchwhatsapp,
                 child: Container(
@@ -579,10 +633,12 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(height: 8,),
+
+              // See My Payments
               InkWell(
                 onTap: (){
                   Navigator.push(context, MaterialPageRoute(builder: (_)=>
-                      MyPayments()));
+                      AddCar()));
                 },
                 child: Container(
                   width: w-30,
@@ -592,9 +648,9 @@ class _HomeState extends State<Home> {
                     child: ListTile(
                       leading: CircleAvatar(
                           backgroundColor: Global.grey,
-                          child: Icon(Icons.payments)),
-                      title: Text("See My Payments",style: TextStyle(fontWeight: FontWeight.w700),),
-                      subtitle: Text("Check all your Transactions done in App",style: TextStyle(fontSize: 11),),
+                          child: Icon(Icons.drive_eta)),
+                      title: Text("Add Your Car",style: TextStyle(fontWeight: FontWeight.w700),),
+                      subtitle: Text("For Better Experience & Reminder",style: TextStyle(fontSize: 11),),
                     ),
                   ),
                 ),

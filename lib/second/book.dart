@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:dod/global/price.dart';
+import 'package:dod/main/car/my_car.dart' show GetMYCAR;
 import 'package:dod/main/second/offers.dart';
 import 'package:dod/second/message/final_payment.dart';
 import 'package:dod/second/message/success.dart';
@@ -11,6 +13,9 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../api.dart';
 import '../global.dart';
+import '../login/bloc/login/view.dart';
+import '../model/price_response.dart';
+import '../model/usercarmodel.dart';
 import '../other/say_no.dart' show Say_No;
 
 class Book_OneWay extends StatefulWidget {
@@ -34,7 +39,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
     Price.gets();
     given=widget.dateTime;
   }
-
+  UserCarModel? car ;
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -170,111 +175,22 @@ class _Book_OneWayState extends State<Book_OneWay> {
                           ),
                         ),
                         SizedBox(height: 20,),
-                        Text("   Car for Today",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
+                        Text("   Select Car for the Drive",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                         SizedBox(height: 5),
                         InkWell(
-                          onTap: (){
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Container(
-                                    padding: EdgeInsets.all(20),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 10,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Center(
-                                          child: Text(
-                                            "Select Transmission & Car Types",
-                                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        Divider(),
-                                        Text(
-                                          "Transmission",
-                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                        ),
-                                        SizedBox(height: 4,),
-                                        Row(
-                                          children: [
-                                            InkWell(
-                                              onTap:(){
-                                                setState(() {
-                                                  trasmission="Manual";
-                                                });
-                                                Navigator.pop(context);
-                                              },
-                                              child: Container(
-                                                decoration:BoxDecoration(
-                                                    color:trasmission=="Manual"?Colors.white:Colors.blue.shade50,
-                                                  borderRadius: BorderRadius.circular(10)
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                                  child: Center(child: Text("Manual")),
-                                                ),
-                                              ),
-                                            ),SizedBox(width: 9,),
-                                            InkWell(
-                                              onTap:(){
-                                                setState(() {
-                                                  trasmission="Automatic";
-                                                });
-                                                Navigator.pop(context);
-                                              },
-                                              child: Container(
-                                                decoration:BoxDecoration(
-                                                    color:trasmission=="Automatic"?Colors.white:Colors.blue.shade50,
-                                                    borderRadius: BorderRadius.circular(10)
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 5),
-                                                  child: Center(child: Text("Automatic")),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 10,),
-                                        Text(
-                                          "Car Type",
-                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                        ),
-                                        SizedBox(height: 4,),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            con("Hatchbacks", w),
-                                            con("Sedan", w),
-                                            con("SUV", w),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
+                          onTap: () async {
+                            UserCarModel cd = await Navigator.push(context,MaterialPageRoute(builder: (_)=>GetMYCAR(select: true,)));
+                            if(cd!=null){
+                              car=cd;
+                              setState(() {
+
+                              });
+                            }
                           },
                           child: Row(
                             children: [
                               SizedBox(width: 15,),
-                              Container(
+                              car==null?Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                     color: Colors.grey.shade300,
@@ -288,15 +204,13 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                     children: [
                                       Icon(Icons.car_crash,color: Colors.green,),
                                       SizedBox(width: 9),
-                                      Text(type,style: TextStyle(fontWeight: FontWeight.w700),),
-                                      SizedBox(width: 7,),
-                                      Icon(Icons.keyboard_arrow_down_rounded,),
+                                      Text("Select Car for the Drive",style: TextStyle(fontWeight: FontWeight.w700),),
+                                      SizedBox(width: 12,),
+                                      Icon(Icons.arrow_forward,),
                                     ],
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 8,),
-                              Container(
+                              ):Container(
                                 decoration: BoxDecoration(
                                     border: Border.all(
                                         color: Colors.grey.shade300,
@@ -308,15 +222,16 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.auto_awesome_mosaic,color: Colors.green,),
+                                      Icon(Icons.car_crash,color: Colors.green,),
                                       SizedBox(width: 9),
-                                      Text(trasmission,style: TextStyle(fontWeight: FontWeight.w700),),
+                                      Text(car!.nickName+" Car Selected",style: TextStyle(fontWeight: FontWeight.w700),),
                                       SizedBox(width: 7,),
-                                      Icon(Icons.keyboard_arrow_down_rounded,),
+                                      Icon(Icons.verified,color: Colors.blue,),
                                     ],
                                   ),
                                 ),
                               ),
+
                             ],
                           ),
                         ),
@@ -356,8 +271,8 @@ class _Book_OneWayState extends State<Book_OneWay> {
                             ),
                           ),
                         ):SizedBox(),
-                        SizedBox(height: 15,),
-                        Row(
+                        SizedBox(height: 5,),
+                        ""==""?SizedBox():Row(
                           children: [
                             Text("   Trip is DOD Secured ?",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                             Spacer(),
@@ -380,7 +295,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                             SizedBox(width: 10,)
                           ],
                         ),
-                        SizedBox(height: 18),
+                        SizedBox(height: 8),
                         Center(
                           child: Container(
                             width: w-30,
@@ -391,7 +306,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 22),
+                        SizedBox(height: 10),
                         Text("   Choose Driver Type",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
                         SizedBox(height: 5),
                         InkWell(
@@ -413,7 +328,6 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   leading: CircleAvatar(
                                     backgroundImage: AssetImage("assets/logo.jpg"),
                                   ),
-                                  trailing: Text("₹$price",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23),),
                                   title: Text("DOD Classic",style: TextStyle(fontWeight: FontWeight.w900),),
                                   subtitle: Text("Verified, Trained & Tested Driver",style: TextStyle(color: Colors.grey.shade500,fontSize: 13),),
                                 ),
@@ -439,7 +353,6 @@ class _Book_OneWayState extends State<Book_OneWay> {
                                   leading: CircleAvatar(
                                     backgroundImage: AssetImage("assets/plus.png"),
                                   ),
-                                  trailing: Text("₹${price+100}",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 23,color: Colors.grey),),
                                   title: Text("DOD Plus",style: TextStyle(fontWeight: FontWeight.w900,color: Colors.grey),),
                                   subtitle: Text("Not Available at the moment",style: TextStyle(color: Colors.grey.shade400,fontSize: 13),),
                                 ),
@@ -462,39 +375,108 @@ class _Book_OneWayState extends State<Book_OneWay> {
           children: [
              InkWell(
                onTap: () async {
+                 if(couponid!=""){
+                   couponid="";
+                   setState(() {
+                   });
+                   return ;
+                 }
                  final op = await Navigator.push(context, MaterialPageRoute(builder: (_)=>Offers()));
+                 if(op==null){
+                   return ;
+                 }
                  setState(() {
                    couponid=op.toString();
                    print(couponid);
                  });
                },
-               child: Padding(
+               child:couponid!=""? Padding(
                   padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
                   child: Row(
                     children: [
                       Icon(Icons.discount,color: Colors.green,),
-                      Text(couponid!=""?"  1 Offer Selected":"  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      Text("  1 Offer Selected",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
                       Spacer(),
-                      Container(width: 1,height: 24,color: Colors.grey,),
-                      SizedBox(width: 9),
-                      Icon(Icons.account_balance,color: Colors.green,),
-                      Text("  Cash / Online",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                      Text("  Delete Coupon",style: TextStyle(color: Colors.red,fontWeight: FontWeight.w800),),
+                      Icon(Icons.delete,color: Colors.red,size: 20,),
                       SizedBox(width: 12,),
-                      Spacer(),
                     ],
                   ),
-                ),
+                ):Padding(
+                 padding: const EdgeInsets.only(left: 8.0,right: 8,bottom: 8,top: 3),
+                 child: Row(
+                   children: [
+                     Icon(Icons.discount,color: Colors.green,),
+                     Text(couponid!=""?"  1 Offer Selected":"  Select Offers",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                     Spacer(),
+                     Container(width: 1,height: 24,color: Colors.grey,),
+                     SizedBox(width: 9),
+                     Icon(Icons.account_balance,color: Colors.green,),
+                     Text("  Cash / Online",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w800),),
+                     SizedBox(width: 12,),
+                     Spacer(),
+                   ],
+                 ),
+               ),
              ),
             InkWell(
-              onTap: (){
+              onTap: () async {
+                if(car==null){
+                  Send.message(context, "Please Select a Car", false);
+                  return ;
+                }
                 double disc = 0.0;
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>Final_Payment(
-                    couponid: couponid, triptype: widget.type=="One Way"?"oneway":(widget.type=="Round Trip"?"roundup":"outstation"), bookingtype: "upcoming",
-                    droplon: widget.lon2, droplat:widget.lat2, pickup: widget.str,
-                    pickup_longitude: widget.lon1, pickup_latitude: widget.lat1,
-                    date: given, drop: widget.str2, waitinghours: i.toDouble(), price: price.toDouble(),
-                  name: widget.type, transmission: trasmission, cartype: type, discount: couponid,
-                )));
+                final Dio dio = Dio(
+                  BaseOptions(
+                    baseUrl: "https://dod.brandeducer.host/api/",
+                    validateStatus: (status) => status != null && status < 500,
+                  ),
+                );
+
+                try {
+                  final response = await dio.post(
+                    "getPrice",
+                    options: Options(
+                      headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer ${UserModel.token}", // your token
+                      },
+                    ),
+                    data: {
+                      "coupon_id": couponid,
+                      "booking_type":widget.type=="One Way"?"oneway":widget.type=="Round Trip"?"roundup":"outstation",
+                      "trip_type": "upcoming",
+                      "paymentmethod": "cash",
+                      "hours": i,
+                      "coin_used": "",
+                    },
+                  );
+                  print("📦 getPrice Response:");
+                  if(response.statusCode==200||response.statusCode==201){
+                    print(response.data);
+                    final priceResponse = PriceResponse.fromJson(response.data);
+                    PriceModel priceData= priceResponse.data;
+                    print(priceData.toString());
+                    Navigator.push(context, MaterialPageRoute(builder: (_)=>Final_Payment(
+                      car: car!,
+                      priceData: priceData,
+                      couponid: couponid, triptype: widget.type=="One Way"?"oneway":(widget.type=="Round Trip"?"roundup":"outstation"), bookingtype: "upcoming",
+                      droplon: widget.lon2, droplat:widget.lat2, pickup: widget.str,
+                      pickup_longitude: widget.lon1, pickup_latitude: widget.lat1,
+                      date: given, drop: widget.str2, waitinghours: i.toDouble(), price: price.toDouble(),
+                      name: widget.type, transmission: trasmission, cartype: type, discount: couponid,
+                    )));
+                  }else{
+                    Send.message(context, "Error: ${response.data}", false);
+                  }
+
+                } catch (e) {
+                  Send.message(context, "❌ getPrice Error: $e", false);
+                  print("❌ getPrice Error: $e");
+                }
+                return ;
+
               },
               child: Container(
                 width: w-10,
@@ -837,29 +819,12 @@ class _Book_OneWayState extends State<Book_OneWay> {
   bool classic=true;
   bool isSwitched = false;
   int i = 1;
-  double returnprice(int i){
-    if(i==1){
-      return 199;
-    }else if(i>=8){
-      return (i*Price.price.hourlyChargesPrice)+300;
-    }else if(i>=6){
-      return (i*Price.price.hourlyChargesPrice)+150;
-    }
-    return i*Price.price.hourlyChargesPrice;
-  }
+
   Widget r (double w, int y)=>InkWell(
     onTap: (){
       setState(() {
         i=y;
-        if(!isSwitched){
-          double base = returnprice(y);
-          print(base);
-          price=(base).toInt();
-        }else{
-          double base = returnprice(y);
-          print(base);
-          price=((base)+100).toInt();
-        }
+
       });
     },
     child: Padding(

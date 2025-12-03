@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../api.dart';
+import '../../global/global_list.dart';
 import '../../login/bloc/login/view.dart';
 import '../../model/booking_response.dart';
 import '../../model/ordermodel.dart';
@@ -20,6 +21,11 @@ class _MyPaymentsState extends State<MyPayments> {
     print("kjfdv mjnfovo");
     gets();
   }
+  void on(bool iss){
+    setState(() {
+      progress = iss;
+    });
+  }
 
   Future<void> gets() async {
     final Dio dio = Dio(
@@ -27,7 +33,7 @@ class _MyPaymentsState extends State<MyPayments> {
         validateStatus: (status) => status != null && status < 500,
       ),
     );
-
+    on(true);
     try {
       final response = await dio.get(
         Api.apiurl + "user-payments",
@@ -46,12 +52,13 @@ class _MyPaymentsState extends State<MyPayments> {
         print(response.data);
         setState(() {
 
-        });
+        });on(false);
       } else {
         print("❌ Error: ${response.statusMessage}");
-        print(response.data);
+        print(response.data);on(false);
       }
     } catch (e) {
+      on(false);
       print("Error during API call: $e");
     }
   }
@@ -59,10 +66,8 @@ class _MyPaymentsState extends State<MyPayments> {
   List<OrderModel> orders = [];
   @override
   Widget build(BuildContext context) {
+    double w = MediaQuery.of(context).size.width;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: (){
-        gets();
-      }),
       appBar:AppBar(
         backgroundColor: Color(0xff25252D),
         automaticallyImplyLeading: true,
@@ -71,6 +76,16 @@ class _MyPaymentsState extends State<MyPayments> {
         ),
         title: Text("My Transactions",style: TextStyle(color: Colors.white),),
       ),
+      body: Column(
+        children: [
+          progress
+              ?  GlobalShimmer.shimmer(w)
+              : orders.isEmpty
+              ? GlobalShimmer.empty(context,"Transactions")
+              :SizedBox()
+        ],
+      ),
     );
   }
+  bool progress = false;
 }

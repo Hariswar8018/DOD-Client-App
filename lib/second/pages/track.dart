@@ -1,5 +1,8 @@
+import 'package:dod/global.dart';
 import 'package:dod/model/ordermodel.dart';
+import 'package:dod/return_functions/driver_location.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_widget/google_maps_widget.dart';
 
 import '../../main/second/gethelp.dart';
 
@@ -24,10 +27,85 @@ class _TrackState extends State<Track> {
             color: Colors.white
         ),
         centerTitle: true,
-        title: Text("Track Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+        title: InkWell(
+            onTap: (){
+              print(widget.order.driver!.firebaseId);
+            },
+            child: Text("Track Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
       ),
-      body: error(w),
+      body: check()?
+      DriverMapWidget(driverId: widget.order.driver!.firebaseId, initialCameraPosition: LatLng(Global.mylat!, Global.mylong!)):
+      error(w),
     );
+  }
+  bool check(){
+    if(widget.order.status=="arriving"||widget.order.status=="arrived"){
+      return true;
+    }
+    if(widget.order.tripType!="monthly"||widget.order.tripType!="weekly"){
+      return canShowStartButton(startDateTimeString: widget.order.bookingTime.toString(), isDailyDriver: false, endDateString: widget.order.bookingTime.toString());
+    }else{
+      return canShowStartButton(startDateTimeString: widget.order.recurringBooking!.startDate, isDailyDriver: true, endDateString: widget.order.recurringBooking!.endDate);
+    }
+  }
+  bool canShowStartButton({
+    required String startDateTimeString,
+    required bool isDailyDriver,
+    required String endDateString,   // ← changed here
+  }) {
+    // Parse the start datetime string
+    DateTime? startDateTime = DateTime.tryParse(startDateTimeString);
+    if (startDateTime == null) return false; // invalid input
+
+    // Parse end date string (only date required)
+    DateTime? endDate = DateTime.tryParse(endDateString);
+    if (endDate == null) return false; // invalid input
+
+    DateTime now = DateTime.now();
+
+    // ---------------------------
+    // CASE 1: One-Time Driver
+    // ---------------------------
+    if (!isDailyDriver) {
+      // window: (start - 20 minutes) ≤ now < start
+      DateTime windowStart = startDateTime.subtract(Duration(minutes: 20));
+      return now.isAfter(windowStart) && now.isBefore(startDateTime);
+    }
+
+    // --------------------------------
+    // CASE 2: Daily Driver
+    // --------------------------------
+
+    // Extract only the TIME from the startDateTime (hour/minute)
+    int hour = startDateTime.hour;
+    int minute = startDateTime.minute;
+
+    // Today’s schedule time (same time every day)
+    DateTime todayScheduled = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    DateTime todayWindowStart =
+    todayScheduled.subtract(Duration(minutes: 20));
+
+    // Convert dates to compare only date part
+    DateTime startDateOnly = DateTime(startDateTime.year, startDateTime.month, startDateTime.day);
+    DateTime endDateOnly = DateTime(endDate.year, endDate.month, endDate.day);
+    DateTime todayDateOnly = DateTime(now.year, now.month, now.day);
+
+    // Check if today is between start and end date
+    bool dateValid = todayDateOnly.isAtSameMomentAs(startDateOnly) ||
+        (todayDateOnly.isAfter(startDateOnly) && todayDateOnly.isBefore(endDateOnly)) ||
+        todayDateOnly.isAtSameMomentAs(endDateOnly);
+
+    if (!dateValid) return false;
+
+    // Time check (20 minutes window)
+    return now.isAfter(todayWindowStart) && now.isBefore(todayScheduled);
   }
 
   Widget error(double w){
@@ -102,6 +180,7 @@ class _TrackState extends State<Track> {
       ],
     );
   }
+
   int isAfter(String dateString) {
     try {
       DateTime parsed = DateTime.parse(dateString).toUtc();

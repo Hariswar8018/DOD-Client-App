@@ -65,7 +65,7 @@ class Profile extends StatelessWidget {
                       CircleAvatar(
                         radius: 40,
                         backgroundColor: Global.grey,
-                        child: Text("A",style: TextStyle(color: Colors.grey.shade800,fontSize: 28),),
+                        child: Text("${UserModel.user.name.substring(0,1)}",style: TextStyle(color: Colors.grey.shade800,fontSize: 28),),
                       ),
                       SizedBox(width: 15,),
                       Column(
@@ -73,7 +73,7 @@ class Profile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(UserModel.user.name,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                          Text("${strreturn()}"),
+                          Text("${UserModel.user.mobile}"),
                         ],
                       ),
                       Spacer(),

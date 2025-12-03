@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dod/login/bloc/login/state.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,7 +20,17 @@ class LocationPermission extends StatefulWidget {
 
 class _LocationPermissionState extends State<LocationPermission> {
 
+  Future<void> ask() async {
+    final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+    await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
   Future<void> requestLocationPermission(BuildContext context) async {
+    ask();
     var status = await Permission.location.request();
 
     if (status.isGranted) {

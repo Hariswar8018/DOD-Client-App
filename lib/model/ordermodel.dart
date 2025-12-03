@@ -4,34 +4,48 @@
 
 
 import 'dart:convert';
-
 class OrderModel {
   final int id;
   final int userId;
   final int? driverId;
   final int? carId;
   final int? couponId;
+
   final String bookingType;
   final String tripType;
+  final String hours;
   final String waitingHours;
+
   final DateTime? bookingTime;
   final double distanceKm;
+
   final String pickupLocation;
   final double pickupLatitude;
   final double pickupLongitude;
+
   final String dropLocation;
   final double dropLatitude;
   final double dropLongitude;
+
   final String paymentMethod;
-  final double paidAmount;
+
   final double amount;
+  final double subTotal;
   final double discountAmount;
+  final double paidAmount;
+
+  final double perHourCharge;
+  final double foodAllowance;
+  final double stayAllowance;
+
   final String status;
   final DateTime createdAt;
   final DateTime? updatedAt;
+
   final User user;
   final User? driver;
   final RecurringBooking? recurringBooking;
+
   OrderModel({
     required this.id,
     required this.userId,
@@ -40,6 +54,7 @@ class OrderModel {
     this.couponId,
     required this.bookingType,
     required this.tripType,
+    required this.hours,
     required this.waitingHours,
     this.bookingTime,
     required this.distanceKm,
@@ -50,9 +65,13 @@ class OrderModel {
     required this.dropLatitude,
     required this.dropLongitude,
     required this.paymentMethod,
-    required this.paidAmount,
     required this.amount,
+    required this.subTotal,
     required this.discountAmount,
+    required this.paidAmount,
+    required this.perHourCharge,
+    required this.foodAllowance,
+    required this.stayAllowance,
     required this.status,
     required this.createdAt,
     this.updatedAt,
@@ -68,31 +87,44 @@ class OrderModel {
       driverId: _tryInt(json['driver_id']),
       carId: _tryInt(json['car_id']),
       couponId: _tryInt(json['coupon_id']),
+
       bookingType: json['booking_type'] ?? '',
       tripType: json['trip_type'] ?? '',
-      waitingHours: json['waiting_hours']?.toString() ?? '',
-      bookingTime: DateTime.tryParse(json['booking_time'] ?? ''),
+      hours: json['hours']?.toString() ?? "",
+      waitingHours: json['waiting_hours']?.toString() ?? "",
+
+      bookingTime: DateTime.tryParse(json['booking_time'] ?? ""),
       distanceKm: _parseDouble(json['distance_km']),
+
       pickupLocation: json['pickup_location'] ?? '',
       pickupLatitude: _parseDouble(json['pickup_latitude']),
       pickupLongitude: _parseDouble(json['pickup_longitude']),
+
       dropLocation: json['drop_location'] ?? '',
       dropLatitude: _parseDouble(json['drop_latitude']),
       dropLongitude: _parseDouble(json['drop_longitude']),
+
       paymentMethod: json['paymentmethod'] ?? '',
-      paidAmount: _parseDouble(json['paid_amount']),
+
       amount: _parseDouble(json['amount']),
+      subTotal: _parseDouble(json['sub_total']),
       discountAmount: _parseDouble(json['discountamount']),
+      paidAmount: _parseDouble(json['paid_amount']),
+
+      perHourCharge: _parseDouble(json['per_hour_charge']),
+      foodAllowance: _parseDouble(json['food_allowance']),
+      stayAllowance: _parseDouble(json['stay_allowance']),
+
       status: json['status'] ?? '',
-      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updated_at'] ?? ''),
+
+      createdAt: DateTime.tryParse(json['created_at'] ?? "") ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] ?? ""),
+
       user: User.fromJson(json['user'] ?? {}),
-      driver: json['driver'] == null
-          ? null
-          : User.fromJson(json['driver']),
-      recurringBooking: json['recurring_booking'] == null
-          ? null
-          : RecurringBooking.fromJson(json['recurring_booking']),
+      driver: json['driver'] != null ? User.fromJson(json['driver']) : null,
+      recurringBooking: json['recurring_booking'] != null
+          ? RecurringBooking.fromJson(json['recurring_booking'])
+          : null,
     );
   }
 
@@ -164,7 +196,7 @@ class User {
       role: json['role'] ?? '',
       email: json['email'] ?? '',
       mobile: json['mobile']?.toString() ?? '',
-      coins: json['coins'],
+      coins: OrderModel._tryInt(json['coins']),
       emailVerifiedAt: json['email_verified_at'],
       fcmToken: json['fcm_token'],
       platformType: json['platform_type'] ?? '',
@@ -183,8 +215,8 @@ class RecurringBooking {
   final int id;
   final int userId;
   final String bookingType;
-  final List<RouteModel> routes;   // 👈 FIXED
-  final List<String> days;         // ["saturday", ...]
+  final List<RouteModel> routes;
+  final List<String> days;
   final String startDate;
   final String endDate;
   final String status;
@@ -255,4 +287,17 @@ class RouteModel {
       dropTime: json['drop_time'] ?? '',
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'pickup_location': pickupLocation,
+      'pickup_latitude': pickupLatitude,
+      'pickup_longitude': pickupLongitude,
+      'drop_location': dropLocation,
+      'drop_latitude': dropLatitude,
+      'drop_longitude': dropLongitude,
+      'pickup_time': pickupTime,
+      'drop_time': dropTime,
+    };
+  }
+
 }

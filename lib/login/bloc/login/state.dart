@@ -3,8 +3,11 @@ import 'package:dod/model/usermodel.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../api.dart';
 import 'cubit.dart';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
@@ -15,9 +18,29 @@ class AuthCubit extends Cubit<AuthState> {
     ),
   );
 
+  Future<String> getfcm() async {
+    try {
+      final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      String token = await FirebaseMessaging.instance.getToken() ?? "NA";
+      print("FCM Token: $token");
+      return token;
+    }catch(e){
+      return "NA";
+    }
+  }
+
   Future<void> registerOrLogin() async {
     emit(AuthLoading());
     print("Success------------------------------------------->");
+    SharedPreferences sg = await SharedPreferences.getInstance();
+    String coupon = sg.getString('coupon')??'None';
+    String token = await getfcm();
     try {
       final response = await dio.post(
         Api.apiurl + "register",
@@ -25,14 +48,13 @@ class AuthCubit extends Cubit<AuthState> {
           "provider": "mobile",
           "firebase_id": FirebaseAuth.instance.currentUser!.uid,
           "name": "No Name Provided",
-          "email":
-          "num${FirebaseAuth.instance.currentUser!.phoneNumber}@gmail.com",
+          "email": "num${FirebaseAuth.instance.currentUser!.phoneNumber}@gmail.com",
           "password": "",
           "mobile": "${FirebaseAuth.instance.currentUser!.phoneNumber}",
           "platform_type": "android",
           "role": "customer",
-          "referral_number": "NAN",
-          "fcm_token": "gyhjhj",
+          "referral_number": coupon,
+          "fcm_token": token,
         },
       );
       print(response.data);
@@ -47,7 +69,7 @@ class AuthCubit extends Cubit<AuthState> {
             "provider": "mobile",
             "firebase_id": FirebaseAuth.instance.currentUser!.uid,
             "mobile": "${FirebaseAuth.instance.currentUser!.phoneNumber}",
-            "fcm_token": "gyhjhj",
+            "fcm_token": token,
           },
         );
         print(loginResponse.data);

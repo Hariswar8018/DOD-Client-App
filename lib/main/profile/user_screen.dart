@@ -80,7 +80,7 @@ class User_Profile extends StatelessWidget {
                   isemail: true)));
             },
             leading: Icon(Icons.mail,color: Colors.grey,),
-            title: Text(UserModel.user.email),
+            title: Text(validateEmailString(UserModel.user.email)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -88,13 +88,20 @@ class User_Profile extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.call,color: Colors.grey,),
-            title: Text(strreturn()),
+            title: Text("${UserModel.user.mobile}"),
           ),
 
         ],
       ),
     );
   }
+   String validateEmailString(String value) {
+     if (value.toLowerCase().startsWith("num")) {
+       return "No email address provided";
+     }
+     return value;
+   }
+
    String strreturn(){
      try{
        String phone = FirebaseAuth.instance.currentUser!.phoneNumber??"+911111111111";

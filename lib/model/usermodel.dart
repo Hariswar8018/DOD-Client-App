@@ -7,6 +7,10 @@ class UserData {
   final String role;
   final String email;
   final String mobile;
+
+  final int? coins;                // NEW
+  final double walletBalance;      // NEW
+
   final String? emailVerifiedAt;
   final String fcmToken;
   final String platformType;
@@ -17,7 +21,7 @@ class UserData {
   final double? longitude;
   final String? joined;
   final String? lastOnline;
-  final bool online; // keep as bool
+  final bool online;
 
   UserData({
     required this.id,
@@ -28,6 +32,8 @@ class UserData {
     required this.role,
     required this.email,
     required this.mobile,
+    this.coins,                 // NEW
+    required this.walletBalance, // NEW
     this.emailVerifiedAt,
     required this.fcmToken,
     required this.platformType,
@@ -51,6 +57,13 @@ class UserData {
       role: json['role'] ?? '',
       email: json['email'] ?? '',
       mobile: json['mobile'] ?? '',
+
+      // NEW FIELDS
+      coins: json['coins'] != null ? int.tryParse(json['coins'].toString()) : null,
+      walletBalance: json['wallet_balance'] != null
+          ? double.tryParse(json['wallet_balance'].toString()) ?? 0.0
+          : 0.0,
+
       emailVerifiedAt: json['email_verified_at'],
       fcmToken: json['fcm_token'] ?? '',
       platformType: json['platform_type'] ?? '',
@@ -61,7 +74,7 @@ class UserData {
       longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
       joined: json['joined'],
       lastOnline: json['last_online'],
-      online: json['online'] == 1 || json['online'] == true,
+      online: json['online'] == "1" || json['online'] == 1 || json['online'] == true,
     );
   }
 
@@ -75,6 +88,11 @@ class UserData {
       'role': role,
       'email': email,
       'mobile': mobile,
+
+      // NEW FIELDS
+      'coins': coins,
+      'wallet_balance': walletBalance.toStringAsFixed(2),
+
       'email_verified_at': emailVerifiedAt,
       'fcm_token': fcmToken,
       'platform_type': platformType,
@@ -85,7 +103,7 @@ class UserData {
       'longitude': longitude,
       'joined': joined,
       'last_online': lastOnline,
-      'online': online ? 1 : 0, // store as int for backend
+      'online': online ? 1 : 0,
     };
   }
 }

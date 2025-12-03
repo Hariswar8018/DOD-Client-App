@@ -11,16 +11,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
+import '../../model/price_response.dart';
+import '../../model/usercarmodel.dart';
+
 class Final_Payment extends StatefulWidget {
   String couponid, bookingtype, triptype, pickup ,drop,name,transmission, cartype;
   double waitinghours,pickup_longitude, pickup_latitude,droplat, droplon ; String discount;
   double price;
-  DateTime date;
-   Final_Payment({super.key,required this.couponid,required this.triptype,
+  DateTime date;UserCarModel car ;
+
+  PriceModel priceData ;
+   Final_Payment({super.key,required this.couponid,required this.triptype,required this.car,
     required this.bookingtype,required this.droplon,required this.droplat,required this.name,
     required this.pickup,required this.pickup_longitude,required this.pickup_latitude,
      required this.transmission,required this.cartype,required this.discount,
-    required this.date,required this.drop,required this.waitinghours,required this.price});
+    required this.date,required this.drop,required this.waitinghours,required this.price,required this.priceData});
 
   @override
   State<Final_Payment> createState() => _Final_PaymentState();
@@ -284,13 +289,13 @@ class _Final_PaymentState extends State<Final_Payment> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       header("Fare Estimate"),
-                      widget.waitinghours>=6?ro("Food Allowance ( Time > 6 hr )","₹150"):SizedBox(),
-                      widget.waitinghours>=8?ro("Stay Allowance ( Time > 8 hr )","₹150"):SizedBox(),
+                      widget.waitinghours>=6?ro("Food Allowance ( Time > 6 hr )","₹${widget.priceData.foodAllowance}"):SizedBox(),
+                      widget.waitinghours>=8?ro("Stay Allowance ( Time > 8 hr )","₹${widget.priceData.stayAllowance}"):SizedBox(),
                       widget.waitinghours>=6?SizedBox(height: 9,):SizedBox(),
-                      ro("Driver Cost","₹${(((widget.price+ri())*0.75)).toStringAsFixed(1)}"),
-                      ro("Est. Commision","₹${(widget.price*0.02).toStringAsFixed(1)}"),
-                      ro("Total GST","₹${(widget.price*0.18).toStringAsFixed(1)}"),
-                      ro1("Total Amount to be Paid","₹${widget.price}"),
+                      ro("Driver Cost","₹${widget.priceData.perHourCharge} x ${(widget.waitinghours).toInt()} hr"),
+                      ro("Coin Uses","₹${widget.priceData.coinUses}"),
+                      ro("Total Discount","₹${widget.priceData.discountAmount}"),
+                      ro1("Total Amount to be Paid","₹${widget.priceData.subTotal}"),
                     ],
                   ),
                 ),
@@ -529,8 +534,11 @@ class _Final_PaymentState extends State<Final_Payment> {
 
     final data = {
       "coupon_id": null,
+      "paymentmethod": "cash",
+          "car_id": widget.car.id,
       "booking_type": widget.triptype=="One Way"?"oneway":widget.triptype=="Round Trip"?"roundtrip":"outstation",
       "trip_type": "upcoming",
+      "hours": widget.waitinghours.toInt(),
       "waiting_hours": widget.waitinghours.toInt(),
       "pickup_location": widget.pickup,
       "pickup_latitude": widget.pickup_latitude,

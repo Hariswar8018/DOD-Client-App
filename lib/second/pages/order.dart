@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dod/global.dart';
 import 'package:dod/model/ordermodel.dart';
 import 'package:dod/second/pages/about_driver.dart';
 import 'package:dod/second/pages/track.dart';
@@ -49,8 +50,12 @@ class Myorder extends StatelessWidget {
       ),
       body: Column(
         children: [
-          order.driver==null?SizedBox():InkWell(
+          InkWell(
               onTap: (){
+                if(order.driver==null){
+                  Send.message(context, "This Function will Work once an Driver accepts your Order", false);
+                  return ;
+                }
                 Navigator.push(context, MaterialPageRoute(builder: (_)=>MyDriver(driver: order.driver!, order: order,)));
               },
               child: lis(Icon(Icons.drive_eta,color: Colors.black,), "My Driver", "Get in touch with your Driver")),
@@ -61,6 +66,10 @@ class Myorder extends StatelessWidget {
               child: lis(Icon(Icons.indeterminate_check_box,color: Colors.orange,), "My Order", "Info about your Product")),
           InkWell(
               onTap: (){
+                if(order.driver==null){
+                  Send.message(context, "This Function will Work once an Driver accepts your Order", false);
+                  return ;
+                }
                 Navigator.push(context,MaterialPageRoute(builder: (_)=>Track(order:order,)));
               },
               child: lis(Icon(Icons.my_location_outlined,color: Colors.brown,), "Track Driver", "Track Driver of their Location")),

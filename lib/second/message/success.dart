@@ -48,7 +48,7 @@ class BookingSuccess extends StatelessWidget {
                     ro("Order Id ","#DOD${time.millisecondsSinceEpoch}"),
                     Divider(),
                     ro("Pickup Time & Date",formatDateTime(time)),
-                    ro("Hour",hour),
+                    ro("Hour",hour+" Hours"),
                     ro("Pickup Address",address.substring(0,28)+"..."),
                   ],
                 ),

@@ -2,6 +2,7 @@ import 'package:dod/global.dart';
 import 'package:dod/login/otp_verify.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -99,6 +100,42 @@ class _LoginState extends State<Login> {
               },
             ),
           ),
+          SizedBox(height: 15,),
+          Container(
+            width: w-40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(color: Colors.grey.shade300, width: 2),
+            ),
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: TextField(
+                controller: coupon,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w800
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  prefixStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800
+                  ),
+                  hintText: "   Enter your Coupon Code ( Optional )",
+                  hintStyle: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
           Spacer(),
           Text("By continuing use to our App, you agree to :",style: TextStyle(color: Colors.white),),
           Padding(
@@ -108,7 +145,9 @@ class _LoginState extends State<Login> {
           Text("Privacy Policy",style: TextStyle(color: Colors.blue,fontWeight: FontWeight.w500),),
           SizedBox(height: 35),
           on?CircularProgressIndicator(backgroundColor: Colors.white,):InkWell(
-            onTap: (){
+            onTap: () async {
+              SharedPreferences sg = await SharedPreferences.getInstance();
+              sg.setString('coupon', coupon.text);
               go(context);
             },
             child: Center(
@@ -129,6 +168,7 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+  TextEditingController coupon = TextEditingController();
 
   Future<void> go(BuildContext context) async {
     if(_controller.text.length==10){
