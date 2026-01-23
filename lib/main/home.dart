@@ -37,6 +37,8 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
+ int completed = 0;
+ int booked = 0;
 
 class _HomeState extends State<Home> {
   Future<void> getImages() async {
@@ -168,6 +170,12 @@ class _HomeState extends State<Home> {
         print(UserModel.token);
         final bookingsResponse = BookingsResponse.fromJson(response.data);
         final newOrders = bookingsResponse.data.bookings;
+        for (OrderModel order in newOrders ){
+          if(order.status=="completed"){
+            completed++;
+          }
+        }
+        booked=newOrders.length;
         orders.addAll(newOrders);
       } else {
         print("❌ Error: ${response.statusMessage}");
@@ -176,6 +184,7 @@ class _HomeState extends State<Home> {
       print("Error during API call: $e");
     }
   }
+
 
   List<OrderModel> orders = [];
 
@@ -561,9 +570,9 @@ class _HomeState extends State<Home> {
                               child: cont(w, Colors.red.shade50, "assets/coins-money-svgrepo-com.svg", "My Coins")),
                           InkWell(
                               onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (_)=>MyPayments()));
+                                Contacts.launchwhatsapp();
                               },
-                              child: cont(w, Colors.grey.shade100, "assets/payment-credit-card-svgrepo-com.svg", "Payments")),
+                              child: cont(w, Colors.grey.shade100, "assets/reading-a-book-learn-understand-forecast-svgrepo-com.svg", "Learn Driving")),
                         ],
                       ),
                       SizedBox(height: 9,),
@@ -750,7 +759,7 @@ class _HomeState extends State<Home> {
                   SizedBox(height: 5,),
                   Padding(
                     padding: const EdgeInsets.all(4.0),
-                    child: Text("Pickup Time : 18 mins from Now",style: TextStyle(fontWeight: FontWeight.w800,color: Colors.grey),),
+                    child: Text("Pickup Time : 25 mins from Now",style: TextStyle(fontWeight: FontWeight.w800,color: Colors.grey),),
                   ),
                   Spacer(),
                   InkWell(

@@ -1,11 +1,13 @@
 
 
 
+import 'package:dod/api.dart';
 import 'package:dod/global.dart';
 import 'package:dod/second/book.dart';
 import 'package:dod/second/book_daily.dart';
 import 'package:dod/second/shedule_book_confirm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:map_location_picker/map_location_picker.dart' as dk;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +36,9 @@ class _One_WayState extends State<One_Way> {
               color: Colors.white
           ),
           centerTitle: true,
-          title: Text(widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+          title: InkWell(
+              onTap: gets,
+              child: Text(widget.i==0?"One Way":(widget.i==1?"Round Trip":(widget.i==2?"OutStation":"Daily Drivers")),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
         ),
       backgroundColor: Colors.white,
       body: Column(
@@ -260,19 +264,38 @@ class _One_WayState extends State<One_Way> {
     str= Global.mylocation;
   }
 
-  void _onSearchChanged() {
-    String query = controller.text.toLowerCase();
-    if (query.length >= 1) {
-      setState(() {
-        filteredPlaces = Global.places
-            .where((place) => place.toLowerCase().contains(query))
-            .toList();
-      });
-    } else {
-      setState(() {
-        filteredPlaces.clear();
-      });
-    }
+  Future<void> gets() async {
+    final places = FlutterGooglePlacesSdk(Api.googlemap);
+    final predictions = await places.findAutocompletePredictions(controller.text);
+    print('Result: $predictions');
   }
+
+  void _onSearchChanged() async {
+    String query = controller.text.trim();
+    setup(true);
+    // Show nothing if less than 2 letters
+    if (query.length < 2) {
+      setState(() => filteredPlaces = []);
+      return;
+    }
+
+    final places = FlutterGooglePlacesSdk(Api.googlemap);
+
+    final result = await places.findAutocompletePredictions(query);
+
+    setState(() {
+      filteredPlaces = result.predictions
+          .map((p) => p.fullText)
+          .toList();
+    });
+    setup(false);
+  }
+
+  void setup(bool yes){
+    setState(() {
+      on=yes;
+    });
+  }
+
   TextEditingController controller=TextEditingController();
 }

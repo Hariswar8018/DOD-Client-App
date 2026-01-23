@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dod/global.dart';
+import 'package:dod/global/global_list.dart';
 import 'package:dod/model/ordermodel.dart';
 import 'package:dod/second/booking/book_api.dart';
 import 'package:dod/second/pages/mybooking_full.dart';
@@ -60,7 +61,9 @@ class _MyBookingsState extends State<MyBookings> {
           hasMore = false; // no more pages
         }
 
-        setState(() {});
+        setState(() {
+          done = true;
+        });
       }
     } catch (e) {
       print("Error: $e");
@@ -70,6 +73,7 @@ class _MyBookingsState extends State<MyBookings> {
   }
 
 
+  bool done= false;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +87,7 @@ class _MyBookingsState extends State<MyBookings> {
         ),
         title: Text("My Bookings",style: TextStyle(color: Colors.white),),
       ),
-      body: orders.isNotEmpty?show():ListView.builder(
+      body:done?(orders.isEmpty?GlobalShimmer.empty(context, "Orders"):show()):ListView.builder(
         itemCount: 10,
         itemBuilder: (context,index){
           return Padding(
@@ -208,6 +212,48 @@ class _OrderCardsState extends State<OrderCards> {
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     oop(BookingStatus.over, context);
     payments(response.orderId!, response.paymentId, response.signature);
+    verifyPayment(response.orderId!, response.paymentId.toString(), response.signature.toString(), widget.myorder.id.toString());
+  }
+
+  Future<void> verifyPayment(String orderId, String paymentId, String sign, String bookingId) async {
+    try {
+      final Dio dio = Dio(
+        BaseOptions(
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+      final String endpoint = "https://dod.brandeducer.host/api/user-booking-payment-status";
+
+      final response = await dio.post( // Changed from put to post based on cURL
+        endpoint,
+        data: {
+          "razorpay_order_id": orderId,
+          "razorpay_payment_id": paymentId,
+          "razorpay_signature": sign,
+          "booking_id": bookingId, // Added booking_id as per cURL
+        },
+        options: Options(
+          // CRITICAL: This matches the 'application/x-www-form-urlencoded' header
+          contentType: Headers.formUrlEncodedContentType,
+          headers: {
+            "Authorization": "Bearer ${UserModel.token}",
+          },
+        ),
+      );
+
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.data}");
+
+      if (response.statusCode == 200) {
+        // Handle success
+        print("Payment Verified Successfully");
+      } else {
+        print("Verification Failed: ${response.statusMessage}");
+      }
+
+    } catch (e) {
+      print("Error during API call: $e");
+    }
   }
   Future<void> payments(String orderid,paymentid,sign) async {
     try {

@@ -24,73 +24,67 @@ class User_Profile extends StatelessWidget {
         ),
         centerTitle: true,
         title: Text("PROFILE",style: TextStyle(color: Colors.black,fontWeight: FontWeight.w600),),
-        actions: [
-          TextButton(onPressed: (){
-            FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
-          }, child: Text("SIGN OUT",style: TextStyle(color: Colors.red,fontWeight: FontWeight.w800),)),
-          SizedBox(width: 10,)
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () async {
-
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(13),
-              child: Container(
-                width: w,
-                height: 240,
-                decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage("assets/car.webp"),fit: BoxFit.cover,
-                  opacity: 0.3),
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.blue,
-                      child: Center(child: Text("A",style: TextStyle(color: Colors.white,fontSize: 27),)),
-                    ),
-                    SizedBox(height: 10,),
-                    InkWell(
-                        onTap: (){
-                            Navigator.push(context,MaterialPageRoute(builder: (_)=>Update(email: "", name: "",
-                                isemail: false)));
-                        },
-                        child: Text(UserModel.user.name,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 17),)),
-                    SizedBox(height: 10,),
-                    Text("Member Since : ${formatDate(UserModel.user.createdAt.substring(0,10))}",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),)
-                  ],
+          SizedBox(height: 40,),
+          Center(
+            child: Container(
+              height: 120,width: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade300,
+              ),
+              child: Center(
+                child: Container(
+                  height: 110,width: 110,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Center(child: Text("${UserModel.user.name.substring(0,1)}",
+                    style: TextStyle(color: Colors.grey.shade800,fontSize: 37),)),
                 ),
               ),
             ),
           ),
-          SizedBox(height: 10,),
+          SizedBox(height: 30,),
           Text("   Your Details",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
+          SizedBox(height: 8),
+          ListTile(
+            onTap: (){
+              Navigator.push(context,MaterialPageRoute(builder: (_)=>Update(email: "", name: "",
+                  isemail: false)));
+            },
+            tileColor: Colors.white,
+            leading: Icon(Icons.person,color: Colors.grey,),
+            trailing: Icon(Icons.edit,color: Colors.red,size: 15,),
+            title: Text(validateEmailString(UserModel.user.name)),
+          ),
           ListTile(
             onTap: (){
               Navigator.push(context,MaterialPageRoute(builder: (_)=>Update(email: "", name: "",
                   isemail: true)));
             },
+            trailing: Icon(Icons.edit,color: Colors.red,size: 15,),
             leading: Icon(Icons.mail,color: Colors.grey,),
             title: Text(validateEmailString(UserModel.user.email)),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Divider(),
-          ),
           ListTile(
+            tileColor: Colors.white,
             leading: Icon(Icons.call,color: Colors.grey,),
             title: Text("${UserModel.user.mobile}"),
           ),
-
+          ListTile(
+            leading: Icon(Icons.hiking,color: Colors.grey,),
+            title: Text("Joined : ${formatDate(UserModel.user.createdAt.substring(0,10))}"),
+          ),
+          ListTile(
+            tileColor: Colors.white,
+            leading: Icon(Icons.accessibility_outlined,color: Colors.grey,),
+            title: Text("My Customer ID : DOD${UserModel.user.id}"),
+          ),
         ],
       ),
     );

@@ -108,12 +108,10 @@ class _OTP_VerifyState extends State<OTP_Verify> {
       setState(() {
         on=false;
       });
-
     } catch (e) {
       setState(() {
         on=false;
       });
-      Send.message(context, "$e", true);
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:dod/global.dart';
 import 'package:dod/global/contacts.dart';
 import 'package:dod/login/bloc/login/view.dart';
+import 'package:dod/main/home.dart';
 import 'package:dod/main/profile/user_screen.dart';
 import 'package:dod/main/second/gethelp.dart';
 import 'package:dod/main/second/join_as_driver.dart';
@@ -13,6 +14,9 @@ import 'package:dod/second/pages/mypayments.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../main.dart';
+import 'coins/mycoins.dart';
+
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
@@ -23,6 +27,33 @@ class Profile extends StatelessWidget {
     }catch(e){
       return "+91-1111111111";
     }
+  }
+
+  Widget c1(double w , Widget c1,String str, String str2){
+    return Container(
+      width: w/3-10,
+      height: 85,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(4)
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            c1,
+            Text(str,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 10),),
+            Spacer(),
+            Row(
+              children: [
+                Spacer(), Text(str2,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 13),)
+              ],
+            )
+          ],
+        ),
+      ),
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -35,52 +66,62 @@ class Profile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-              width: w,
-              height: 150,
-              color: Global.grey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Spacer(),
-                  Text("    Account",style: TextStyle(fontWeight: FontWeight.w800,fontSize: 28),),
-                  SizedBox(height: 16,)
-                ],
+            SizedBox(height: 70),
+            Center(
+              child: Container(
+                height: 120,width: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey.shade300,
+                ),
+                child: Center(
+                  child: Container(
+                    height: 110,width: 110,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                    ),
+                    child: Center(child: Text("${UserModel.user.name.substring(0,1)}",
+                      style: TextStyle(color: Colors.grey.shade800,fontSize: 37),)),
+                  ),
+                ),
               ),
             ),
-            InkWell(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (_)=>User_Profile()));
-              },
-              onLongPress: (){
-                print(FirebaseAuth.instance.currentUser!.uid);
-              },
-              child: Container(
-                width: w,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Global.grey,
-                        child: Text("${UserModel.user.name.substring(0,1)}",style: TextStyle(color: Colors.grey.shade800,fontSize: 28),),
-                      ),
-                      SizedBox(width: 15,),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(UserModel.user.name,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),),
-                          Text("${UserModel.user.mobile}"),
-                        ],
-                      ),
-                      Spacer(),
-                      Icon(Icons.arrow_forward_ios,color: Colors.black,),
-                      SizedBox(width: 10,),
-                    ],
-                  ),
+            SizedBox(height: 15,),
+            Center(child: Text(UserModel.user.name,style: TextStyle(fontWeight: FontWeight.w800,fontSize: 17),)),
+            Center(child: Text("${UserModel.user.mobile}")),
+            SizedBox(height: 25,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                c1(w, Icon(Icons.directions_car_rounded), "Trip Booked", "${booked}"),
+                c1(w, Icon(Icons.directions_car_rounded), "Trip Completed", "${completed}"),
+                c1(w, Icon(Icons.wallet_giftcard), "Wallet Coins", "${UserModel.user.coins}"),
+              ],
+            ),
+            SizedBox(height: 13,),
+            Container(
+              width: w,
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text("My Profile",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
+                     InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>User_Profile()));
+                        },
+                        child: a(Icon(Icons.person,color: Colors.green,),"Edit Profile","Edit your Personal Details")),
+                    InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>
+                              MyCoins()));
+                        },
+                        child: a(Icon(Icons.account_balance_wallet,color: Colors.green,),"My Coins","Check My Total Coins")),
+                  ],
                 ),
               ),
             ),
@@ -175,9 +216,67 @@ class Profile extends StatelessWidget {
                     Text("For Partners",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 19),),
                     InkWell(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Join()));
+                           Navigator.push(context, MaterialPageRoute(builder: (_)=>Join()));
                         },
                         child: a(Icon(Icons.handshake,color: Colors.green,),"Join as DOD Driver","Earn with DOD with 0 Investment")),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 15,),
+            Container(
+              width: w,
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14.0,vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                        onTap: () async {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(0), // Rectangle (no rounded edges)
+                                ),
+                                title: const Text("Log out ?"),
+                                content: const Text("You sure to Log out from the App"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false), // Cancel
+                                    child: const Text("Cancel"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context, false);
+
+                                      await FirebaseAuth.instance.signOut();
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => MyHomePage(title: "")),
+                                      );
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.resolveWith(
+                                            (states) => Colors.red,   // your color here
+                                      ),
+                                    ),
+                                    child: const Text("OK",style: TextStyle(color: Colors.white)),
+                                  )
+                                ],
+                              );
+                            },
+                          );
+
+                              },
+                        child: ListTile(
+                          leading: Icon(Icons.login,color: Colors.red,),
+                          title: Text("Log Out",style: TextStyle(fontWeight: FontWeight.w900,color: Colors.red),),
+                        )
+                    ),
                   ],
                 ),
               ),

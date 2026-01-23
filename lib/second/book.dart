@@ -485,7 +485,7 @@ class _Book_OneWayState extends State<Book_OneWay> {
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(6)
                 ),
-                child: Center(child: Text("Request Classic Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
+                child: Center(child: Text("Request Driver",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),)),
               ),
             ),
           ],

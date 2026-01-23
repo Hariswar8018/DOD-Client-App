@@ -88,6 +88,10 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure("Exception: $e"));
     }
   }
+  void refreshUserData(UserData newData) {
+    emit(AuthSuccess(newData));
+  }
+
 }
 
 class AuthResponse {

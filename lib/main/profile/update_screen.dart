@@ -1,11 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:dod/global.dart';
+import 'package:dod/login/bloc/login/cubit.dart';
 import 'package:dod/login/bloc/login/view.dart';
 import 'package:dod/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../api.dart';
+import '../../login/bloc/login/state.dart';
 
 class Update extends StatefulWidget {
 
@@ -114,9 +118,10 @@ class _UpdateState extends State<Update> {
               print(response.statusMessage);
               print(response.statusCode);
               if (response.statusCode == 201||response.statusCode == 200) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_)=>MyHomePage(title: "")));
+                await update();
+                Navigator.pop(context);
                 Send.message(
-                    context, "Success", true);
+                    context, "Update Successful ! Will take a Minute to propagate changes", true);
                 setState(() {
                   on=false;
                 });
@@ -148,6 +153,49 @@ class _UpdateState extends State<Update> {
       ],
     );
   }
+  Future<void> update() async {
+    String token = await getfcm();
+    final loginResponse = await dio.post(
+      Api.apiurl + "login",
+      data: {
+        "provider": "mobile",
+        "firebase_id": FirebaseAuth.instance.currentUser!.uid,
+        "mobile": "${FirebaseAuth.instance.currentUser!.phoneNumber}",
+        "fcm_token": token,
+      },
+    );
+    print(loginResponse.data);
+    print(loginResponse.statusCode);
+    print(loginResponse.statusMessage);
+    print(loginResponse.data);
+    final authResponse = AuthResponse.fromJson(loginResponse.data);
+    UserModel.token=authResponse.token;
+    setState(() {
 
+    });
+  }
+
+  final Dio dio = Dio(
+    BaseOptions(
+      validateStatus: (status) => status != null && status < 500,
+    ),
+  );
+
+  Future<String> getfcm() async {
+    try {
+      final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      String token = await FirebaseMessaging.instance.getToken() ?? "NA";
+      print("FCM Token: $token");
+      return token;
+    }catch(e){
+      return "NA";
+    }
+  }
   bool on = false;
 }

@@ -86,7 +86,7 @@ class OfferCard extends StatelessWidget {
         if(!show){
           return ;
         }
-        Navigator.pop(context,coupon.code);
+        Navigator.pop(context,coupon.id);
       },
       child: Card(
         color: Colors.white,

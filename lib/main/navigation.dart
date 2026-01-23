@@ -343,23 +343,6 @@ class LoadingScaffold extends StatelessWidget {
               MaterialButton(
                   minWidth: 25, onPressed: (){
 
-                  currentTab = 3;
-
-              },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.two_wheeler,
-                        color: currentTab == 3? Colors.black:Colors.grey, size: 23,
-                      ),
-                      Text("Drivers", style: TextStyle(color: currentTab == 3? Colors.black:Colors.grey, fontSize: 12))
-                    ],
-                  )
-              ),
-              MaterialButton(
-                  minWidth: 25, onPressed: (){
-
                   currentTab = 4;
               },
                   child: Column(
